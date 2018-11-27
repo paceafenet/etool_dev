@@ -1,0 +1,149 @@
+---
+title: "fake_equip_data_gen"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F,
+                      warning = F,
+                      message = F)
+
+library(ggplot2)
+library(reader)
+library(ggthemes)
+library(knitr)
+library(rmarkdown)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(stringi)
+library(shiny)
+library(shinyWidgets)
+library(forcats)
+library(readr)
+library(tibble)
+
+```
+
+```{r}
+
+set.seed(12345)
+
+df <- tibble(
+  serial_num = 1:10000) %>% 
+  rowwise() %>%
+  mutate(equip_type = sample(c("hiv reagents",
+                         "CD4_CD8_counter",
+                         "pcr_machine",
+                         "P24",
+                         "spectrophotometer",
+                         "coulter",
+                         "centrifuge",
+                         "micropipettes",
+                         "pcr_tube",
+                         "graduated_pipettes"),
+                       size = 1,
+                       replace = T),
+         manufacturer = sample(c("lab_equip_r_us",
+                          "best_labs",
+                          "quality_equip"),
+                        size = 1,
+                        replace = T,
+                        prob = c(.5, .25, .25)),
+          manufacture_date = sample(seq(mdy("1/1/2016"), mdy("12/31/2017"), by = "day"),
+                            size = 1,
+                            replace = T),
+         date_active = manufacture_date + sample(1:30,
+                                                 size = 1,
+                                                 replace = T),
+         date_not_viable = manufacture_date + 730,
+         facility = sample(c("Lab1",
+                             "Lab2",
+                             "Lab3",
+                             "Lab4",
+                             "Lab"),
+                           size = 1,
+                           replace = T),
+         ownership_type = sample(c("gov",
+                                 "private",
+                                 "parochial"),
+                                 size = 1,
+                                 replace = T,
+                                 prob = c(.75, .2, .05)),
+         lab_level = sample(c("national",
+                              "regional",
+                              "district",
+                              "other"),
+                            size = 1,
+                            replace = T,
+                            prob = c(.05, .25, .6, .1)),
+         calib_engineer_nm = sample(c("tech1",
+                                "tech2",
+                                "tech3"),
+                              size = 1,
+                              replace = T),
+         calib_engineer_post = ifelse(test = calib_engineer_nm == "tech1",
+                                yes = "affiliate1",
+                                no = ifelse(test = calib_engineer_nm == "tech2",
+                                            yes = "affiliate2",
+                                            no = "affiliate3")),
+         most_recent_calibration = date_active + sample(1:60,
+                                                        size = 1,
+                                                        replace = T),
+         next_calibration = most_recent_calibration + 90,
+         most_recent_maintenance = date_active + sample(30:90,
+                                                        size = 1,
+                                                        replace = T),
+         next_maintenance = most_recent_maintenance + 180,
+         maintenance_engineer_nm = sample(c("tech1",
+                                            "tech2",
+                                            "tech3"),
+                                          size = 1,
+                                          replace = T),
+         maintenance_engineer_post = ifelse(test = maintenance_engineer_nm == "tech1",
+                                yes = "affiliate1",
+                                no = ifelse(test = maintenance_engineer_nm == "tech2",
+                                            yes = "affiliate2",
+                                            no = "affiliate3")),
+         retirement_date = date_active + 720,
+         retirement_requested = NA,
+         retirement_dt_requested = NA)
+  
+
+# equip types - http://cies.edu.ni/cedoc/general/World%20Health%20Organization%20HIV-AI%20(D)2/pdfs/list-laboratory.pdf
+
+
+# •	Equipment location – GPS coordinates
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

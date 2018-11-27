@@ -1,0 +1,106 @@
+---
+title: "scratchpad"
+output: html_document
+runtime: shiny
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F,
+                      warning = F,
+                      message = F)
+
+library(dplyr)
+library(shiny)
+library(shinyWidgets)
+library(sparkline)
+library(DT)
+
+```
+
+```{r}
+data(iris)
+```
+
+```{r}
+
+selectInput("species",
+            label = "Select a flower species",
+            choices = as.character(unique(iris$Species)),
+            selected = as.character(unique(iris$Species[1])))
+
+```
+
+
+```{r}
+
+# tt <- eventReactive(input$species,
+#                     {
+#                       iris %>% 
+#                         filter(Species == "setosa")
+#                     })
+
+# tt_sparkdata <- iris %>% 
+#   filter(Species == "setosa")
+
+# tt <- sparkline(tt_sparkdata[[1]])
+
+
+
+# tt
+# xx
+
+```
+
+This is a test
+
+```{r}
+
+renderSparkline({
+  tt_sparkdata <- iris %>%
+    filter(Species == input$species)
+  
+  sparkline(tt_sparkdata[[1]])
+})
+
+```
+
+to see if I can fake a table
+
+```{r}
+
+renderSparkline({
+  tt_sparkdata <- iris %>%
+    filter(Species == input$species)
+  
+  sparkline(tt_sparkdata[[2]])
+})
+
+```
+
+```{r}
+renderDataTable({
+  tt_sparkdata <- iris %>%
+    filter(Species == input$species)
+  
+  tt_table <- tibble(
+    spark_names = c("test1", "test2"),
+    spark_test = c(spk_chr(tt_sparkdata[[1]]), spk_chr(tt_sparkdata[[2]]))
+  ) %>% 
+    datatable(escape = F,
+              rownames = F,
+              options = list(fnDrawCallback = htmlwidgets::JS('function(){
+                                                              HTMLWidgets.staticRender();
+                                                              }'),
+                             searching = F)) %>% 
+    spk_add_deps()
+  
+})
+```
+
+
+
+
+
+
+
+
