@@ -1,0 +1,318 @@
+---
+title: "Existing Lab Data Exploration"
+description: |
+  This report contains a description of the existing data from Cameroon and Nigeria
+author: Travis Sondgerath
+  # - name:  
+date: '`r Sys.Date()`'
+# runtime: shiny_prerendered  # Add for interactions
+output: html_document:
+  toc_depth: 3
+  # radix::radix_article:
+  #   toc: true
+  #   toc_depth: 3
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F,
+                      warning = F,
+                      message = F)
+
+library(ggplot2)
+library(reader)
+library(ggthemes)
+library(knitr)
+library(rmarkdown)
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(stringi)
+library(shiny)
+library(shinyWidgets)
+library(forcats)
+library(readr)
+library(readxl)
+library(tibble)
+library(RODBC)
+
+```
+
+# Nigeria
+
+```{r}
+
+conn <- odbcConnectAccess2007(access.file = "C:\\Users\\hze6950\\Desktop\\AFNET Project\\NMLStP data\\Revised data_March 8 2013\\westat_origDB 1.accdb")
+
+westat_tables <- sqlTables(channel = conn)
+
+table_info <- tibble()
+
+for(i in westat_tables$TABLE_NAME[westat_tables$TABLE_TYPE != "SYSTEM TABLE"]){
+  # i <- westat_tables$TABLE_NAME[16]
+  
+  nth_table <- sqlColumns(channel = conn,
+                          sqtable = i) %>% 
+    select(3:4)
+  
+  table_info <- bind_rows(table_info, nth_table)
+  
+}
+
+# same as westat 1 - assuming there's more (bind rows later)
+
+# equip_inventory
+
+equip_data <- sqlQuery(channel = conn,
+                       query = "select * from equip_inventory",
+                       max = 0)
+
+equip_data2 <- sqlQuery(channel = conn2,
+                       query = "select * from equip_inventory",
+                       max = 100)
+
+# equip_mant_calibration
+
+equip_mant_data <- sqlQuery(channel = conn,
+                            query = "select * from equip_mant_calibration",
+                            max = 0)
+
+# finance
+
+finance_data <- sqlQuery(channel = conn,
+                         query = "select * from finance",
+                         max = 0)
+
+# lab_profile
+
+lab_profile_data <- sqlQuery(channel = conn,
+                             query = "select * from lab_profile",
+                             max = 0)
+
+# Write all of these to disk
+
+conn2 <- odbcConnectAccess2007(access.file = "C:\\Users\\hze6950\\Desktop\\AFNET Project\\NMLStP data\\Revised data_March 8 2013\\westat_origDB2.accdb")
+
+westat_tables2 <- sqlTables(channel = conn2)
+
+table_info2 <- tibble()
+
+for(i in westat_tables2$TABLE_NAME[westat_tables2$TABLE_TYPE != "SYSTEM TABLE"]){
+  # i <- westat_tables2$TABLE_NAME[westat_tables2$TABLE_TYPE != "SYSTEM TABLE"][1]
+  
+  nth_table <- sqlColumns(channel = conn2,
+                          sqtable = i) %>% 
+    select(3:4)
+  
+  table_info2 <- bind_rows(table_info2, nth_table)
+}
+
+# tt <- sqlQuery(channel = conn2,
+#                query = "select * from incubator",
+#                max = 0)
+
+tt <- sqlQuery(channel = conn2,
+               query = "select * from incubator",
+               max = 0)
+
+equip_info <- tibble(
+  facility_id = tt$site_uniq_id
+)
+
+# Try to harmonize all the columns in a logical way, if possible, then bind_rows to an empty table
+
+for(i in table_info2$TABLE_NAME[table_info2$TABLE_NAME %in% c("auto_cell_sorter", "autoclave", "bio_saf_cab", "cd4_analyzer", "centrifuge", "chem_fume_hood", "clean_bench", "gene_analyzer", "hema_analyzer", "incinerator", "incubator", "water_distiller")]){
+  
+  # i <- "auto_cell_sorter"
+  # i <- "bio_saf_cab"
+  
+  if(i %in% c("auto_cell_sorter", "autoclave", "cd4_analyzer", "centrifuge", "chem_fume_hood", "clean_bench", "gene_analyzer", "hema_analyzer", "incinerator", "incubator", "incubator")){
+    
+    # nth_table <- sqlQuery(channel = conn2,
+    #                       query = paste("select * from",
+    #                                     i)) %>%
+    #   filter(.[[2]] %in% c("Yes", "yes", "YES"))
+    
+    i <- "auto_cell_sorter"
+    
+    if(i == "auto_cell_sorter"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        rename(facility_id = "site_uniq_id",
+               count_equip = "1_yes_how_many",
+               manufacturer = "2_manfacturer",
+               model_number = "3_model_num",
+               serial_number = "4_serial_num",
+               manufacture_date = "5_date_manu",
+               service_provider = "11_who_perf_serv") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider)
+      
+    }
+    
+    if(i == "autoclave"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        rename(facility_id = "site_uniq_id",
+               count_equip = "1a_how_many",
+               manufacturer = "3_manufacturer1",
+               model_number = "4_model_number1",
+               serial_number = "5_serial_number2",
+               manufacture_date = "6_date_manufacture2",
+               service_provider = "12_performs_service") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider)
+      
+    }
+    
+    if(i == "cd4_analyzer"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        rename(facility_id = "site_uniq_id",
+               count_equip = "1_yes_how_many",
+               manufacturer = "2_manufacturer",
+               model_number = "3_model_number",
+               serial_number = "4_serial_number",
+               manufacture_date = "5_date_manu",
+               service_provider = "11_who_performs_services") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider)
+      
+    }
+    
+    if(i == "centrifuge"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        rename(facility_id = "site_uniq_id",
+               count_equip = "1a_how_many1",
+               manufacturer = "4_manufacturer",
+               model_number = "5_model_number",
+               serial_number = "6_serial_number",
+               manufacture_date = "7_date_manufacture",
+               service_provider = "13_perform_service") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider)
+      
+    }
+    
+    if(i == "chem_fume_hood"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        mutate(count_equip = 1) %>% 
+        rename(facility_id = "site_uniq_id",
+               manufacturer = "2_manufacturer",
+               model_number = "3_model_number",
+               serial_number = "4_serial_number",
+               manufacture_date = "5_date_manufacture",
+               service_provider = "11_perform_services") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider)
+      
+    }
+    
+    if(i == "clean_bench"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        mutate(count_equip = 1) %>% 
+        rename(facility_id = "site_uniq_id",
+               manufacturer = "2_manufacturer5",
+               model_number = "3_model_number8",
+               serial_number = "4_serial_number7",
+               manufacture_date = "5_date_maufacture",
+               service_provider = "11_performs_services") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider)
+      
+    }
+    
+    if(i == "gene_analyzer"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        rename(facility_id = "site_uniq_id",
+               count_equip = "1_yes_many",
+               manufacturer = "2_Manufact",
+               model_number = "3_model_num",
+               serial_number = "4_serial_num",
+               manufacture_date = "5_date_Manuf",
+               service_provider = "11_who_perf_serv") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider)
+      
+    }
+    
+    # Here - continue above pattern and finish the equipment list, when done; get rid of intial if() statement, add a bind_rows for each piece and put in empty df
+    
+  }
+  
+  
+  # This one will be different
+  if(i == "bio_saf_cab"){
+    
+    nth_table <- sqlQuery(channel = conn2,
+                          query = paste("select * from",
+                                        i)) %>% 
+      filter(!is.na(.[[2]]))
+    
+    assign(paste0(i, "_df"), nth_table)
+    
+    colnames(nth_table)
+    
+  }
+  
+}
+
+# Important Notes
+
+# No PCR machines in data
+
+```
+
+
+# Cameroon
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
