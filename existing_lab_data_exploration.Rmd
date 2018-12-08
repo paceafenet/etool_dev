@@ -1,17 +1,29 @@
 ---
+# title: "Existing Lab Data Exploration"
+# description: |
+#  This report contains a description of the existing data from Cameroon and Nigeria
+# author:
+#   - name: Travis Sondgerath
+# date: '`r Sys.Date()`'
+# output:
+#   radix::radix_article:
+#     toc: true
+#     toc_depth: 2
+    
 title: "Existing Lab Data Exploration"
-description: |
-  This report contains a description of the existing data from Cameroon and Nigeria
-author: Travis Sondgerath
-  # - name:  
-date: '`r Sys.Date()`'
-# runtime: shiny_prerendered  # Add for interactions
-output: html_document:
-  toc_depth: 3
-  # radix::radix_article:
-  #   toc: true
-  #   toc_depth: 3
+output:
+  md_document:
+    toc: true
+    toc_depth: 2
+    # variant: markdown_github
+always_allow_html: yes
 ---
+
+# Introduction
+
+During initial discussions regarding the eTool development a list of equipment characteristics was agreed upon. In this report I describe the presence or absence of these characteristics in the in-country data already collected in Nigeria and Cameroon during past laboratory assessments. 
+
+If the characteristic is present in existing data, I describe in this report the completeness of this characteristic among equipment inventoried during the past assessment and any other associated issues with the data.
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F,
@@ -27,6 +39,7 @@ library(dplyr)
 library(tidyr)
 library(lubridate)
 library(stringi)
+library(stringr)
 library(shiny)
 library(shinyWidgets)
 library(forcats)
@@ -34,14 +47,395 @@ library(readr)
 library(readxl)
 library(tibble)
 library(RODBC)
+library(kableExtra)
 
 ```
 
 # Nigeria
 
-```{r}
+The Nigerian assessment Dropbox folder was shared with me and contained assessment data last revised March 8th, 2013. 697 facilities were included in these data. Not every facility was fully evaluated as safety concerns were cited as a barrier to assessment. 
+
+The two main files I obtained data from were westat_origDB 1 (Facility Information) and westat_origDB2 (Equipment Information), both are 2007 Access Databases (DB henceforth). My general approach was to pull relevant information from these databases and combine them to form a final data set that most closely resembles the data set I would need for the eTool where each row would be an individual piece of laboratory equipment, and each column a different characteristic describing that piece of equipment. 
+
+In other sections of this report I describe my process in further detail, below is the list of equipment characteristics deemed as necessary for the eTool by the IT Task Force. Next to each item I describe whether the characteristic was present in the Facility Information DB, Equipment Information DB, or absent.
+
+* Type of equipment (Equipment Information)
+* Manufacturer (Equipment Information)
+* Date of manufacture (Equipment Information)
+* Serial number (Equipment Information)
+* Date equipment became active at the facility (absent)
+* Date equipment no longer viable (absent)
+* Equipment location – facility name (Facility Information)
+* Equipment location – GPS coordinates (geocoded from facility address)
+* Ownership type (Government, private owned, etc) (Facility Information)
+* Level of health facility (e.g Referral lab, province lab)  (Facility Information)
+* Name of engineer performing most recent calibration (absent)
+* Post of engineer performing most recent calibration (Equipment Information)
+* Most recent calibration date (absent)
+* Next calibration date (absent)
+* Most recent maintenance date (absent)
+* Name of engineer performing most recent maintenance (absent - only maintenance organization included)
+* Post of engineer performing most recent maintenance (Equipment Information)
+* Next maintenance date (absent)
+* Equipment retirement flag (not applicable to initial data)
+* Retirement request date (not applicable to initial data)
+
+## Equipment Info
+
+The Equipment Info DB contained an inventory of equipment information collected during the assessment. Essentially, each table contained information related to a specific equipment type (tables used listed below) for each of the 697 facilities evaluated. Structuring the data in this manner is problematic as a single facility could have more than one of a certain type of equipment (or none). For example, a single lab could have reported having 3 safety cabinets, but in the data only one serial number at most was listed. Thus a full inventory of all equipment was not available in these data.
+
+* Auto Cell Sorter
+* Autoclave
+* Bio Safety Cab
+* CD4 Analyzer
+* Centrifuge
+* Chemical Fume Hood
+* Clean Bench
+* Gene Analyzer
+* Hematology Analyzer
+* Incinerator
+* Incubator
+* Water Distiller
+
+Although the tables in the Equipment DB contain different information depending on the equipment described, I was able to obtain all characteristics listed under the Introduction section listed with "Equipment Information" next to the characteristic. I left out all data in the Equipment DB where the facility did not respond that they had the equipment being described. 
+
+```{r eval=FALSE}
 
 conn <- odbcConnectAccess2007(access.file = "C:\\Users\\hze6950\\Desktop\\AFNET Project\\NMLStP data\\Revised data_March 8 2013\\westat_origDB 1.accdb")
+
+conn2 <- odbcConnectAccess2007(access.file = "C:\\Users\\hze6950\\Desktop\\AFNET Project\\NMLStP data\\Revised data_March 8 2013\\westat_origDB2.accdb")
+
+westat_tables <- sqlTables(channel = conn)
+
+westat_tables2 <- sqlTables(channel = conn2)
+
+table_info <- tibble()
+
+for(i in westat_tables$TABLE_NAME[westat_tables$TABLE_TYPE != "SYSTEM TABLE"]){
+  # i <- westat_tables$TABLE_NAME[16]
+  
+  nth_table <- sqlColumns(channel = conn,
+                          sqtable = i) %>% 
+    select(3:4)
+  
+  table_info <- bind_rows(table_info, nth_table)
+  
+}
+
+# RELEVANT EQUIPMENT INFORMATION
+
+# tt <- sqlQuery(channel = conn2,
+#                query = "select * from incubator",
+#                max = 0)
+
+tt <- sqlColumns(channel = conn2,
+                 sqtable = "auto_cell_sorter")
+
+
+table_info2 <- tibble()
+
+for(i in westat_tables2$TABLE_NAME[westat_tables2$TABLE_TYPE != "SYSTEM TABLE"]){
+  # i <- westat_tables2$TABLE_NAME[westat_tables2$TABLE_TYPE != "SYSTEM TABLE"][1]
+  
+  nth_table <- sqlColumns(channel = conn2,
+                          sqtable = i) %>% 
+    select(3:4)
+  
+  table_info2 <- bind_rows(table_info2, nth_table)
+}
+
+equip_info <- tibble()
+
+# Try to harmonize all the columns in a logical way, if possible, then bind_rows to an empty table
+
+for(i in table_info2$TABLE_NAME[table_info2$TABLE_NAME %in% c("auto_cell_sorter", "autoclave", "bio_saf_cab", "cd4_analyzer", "centrifuge", "chem_fume_hood", "clean_bench", "gene_analyzer", "hema_analyzer", "incinerator", "incubator", "water_distiller")]){
+  
+  # i <- "auto_cell_sorter"
+  # i <- "bio_saf_cab"
+  
+    
+    if(i == "auto_cell_sorter"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        rename(facility_id = "site_uniq_id",
+               count_equip = "1_yes_how_many",
+               manufacturer = "2_manfacturer",
+               model_number = "3_model_num",
+               serial_number = "4_serial_num",
+               manufacture_date = "5_date_manu",
+               service_provider = "11_who_perf_serv") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider) %>% 
+        mutate(equip_type = i) %>% 
+        mutate_all(as.character)
+      
+      equip_info <- bind_rows(equip_info, nth_table)
+      
+    }
+    
+    if(i == "autoclave"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        rename(facility_id = "site_uniq_id",
+               count_equip = "1a_how_many",
+               manufacturer = "3_manufacturer1",
+               model_number = "4_model_number1",
+               serial_number = "5_serial_number2",
+               manufacture_date = "6_date_manufacture2",
+               service_provider = "12_performs_service") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider) %>% 
+        mutate(equip_type = i) %>% 
+        mutate_all(as.character)
+      
+      equip_info <- bind_rows(equip_info, nth_table)
+      
+    }
+    
+    if(i == "cd4_analyzer"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        rename(facility_id = "site_uniq_id",
+               count_equip = "1_yes_how_many",
+               manufacturer = "2_manufacturer",
+               model_number = "3_model_number",
+               serial_number = "4_serial_number",
+               manufacture_date = "5_date_manu",
+               service_provider = "11_who_performs_services") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider) %>% 
+        mutate(equip_type = i) %>% 
+        mutate_all(as.character)
+      
+      equip_info <- bind_rows(equip_info, nth_table)
+      
+    }
+    
+    if(i == "centrifuge"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        rename(facility_id = "site_uniq_id",
+               count_equip = "1a_how_many1",
+               manufacturer = "4_manufacturer",
+               model_number = "5_model_number",
+               serial_number = "6_serial_number",
+               manufacture_date = "7_date_manufacture",
+               service_provider = "13_perform_service") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider) %>% 
+        mutate(equip_type = i) %>% 
+        mutate_all(as.character)
+      
+      equip_info <- bind_rows(equip_info, nth_table)
+      
+    }
+    
+    if(i == "chem_fume_hood"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        mutate(count_equip = 1) %>% 
+        rename(facility_id = "site_uniq_id",
+               manufacturer = "2_manufacturer",
+               model_number = "3_model_number",
+               serial_number = "4_serial_number",
+               manufacture_date = "5_date_manufacture",
+               service_provider = "11_perform_services") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider) %>% 
+        mutate(equip_type = i) %>% 
+        mutate_all(as.character)
+      
+      equip_info <- bind_rows(equip_info, nth_table)
+      
+    }
+    
+    if(i == "clean_bench"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        mutate(count_equip = 1) %>% 
+        rename(facility_id = "site_uniq_id",
+               manufacturer = "2_manufacturer5",
+               model_number = "3_model_number8",
+               serial_number = "4_serial_number7",
+               manufacture_date = "5_date_maufacture",
+               service_provider = "11_performs_services") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider) %>% 
+        mutate(equip_type = i) %>% 
+        mutate_all(as.character)
+      
+      equip_info <- bind_rows(equip_info, nth_table)
+      
+    }
+    
+    if(i == "gene_analyzer"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        rename(facility_id = "site_uniq_id",
+               count_equip = "1_yes_many",
+               manufacturer = "2_Manufact",
+               model_number = "3_model_num",
+               serial_number = "4_serial_num",
+               manufacture_date = "5_date_Manuf",
+               service_provider = "11_who_perf_serv") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider) %>% 
+        mutate(equip_type = i) %>% 
+        mutate_all(as.character)
+      
+      equip_info <- bind_rows(equip_info, nth_table)
+      
+    }
+    
+    if(i == "hema_analyzer"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        rename(facility_id = "site_uniq_id",
+               count_equip = "1_yes_many",
+               manufacturer = "2_manfacturer",
+               model_number = "3_model_num",
+               serial_number = "4_serial_num",
+               manufacture_date = "5_date_manu",
+               service_provider = "11_who_performs_services") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider) %>% 
+        mutate(equip_type = i) %>% 
+        mutate_all(as.character)
+      
+      equip_info <- bind_rows(equip_info, nth_table)
+      
+    }
+      
+      if(i == "incinerator"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        rename(facility_id = "site_uniq_id",
+               count_equip = "1a_how_many",
+               manufacturer = "2_manufacturer",
+               model_number = "3_model_number1",
+               serial_number = "4_serial_number",
+               manufacture_date = "5_date_manufacture1",
+               service_provider = "11_perform_service") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider) %>% 
+        mutate(equip_type = i) %>% 
+        mutate_all(as.character)
+      
+      equip_info <- bind_rows(equip_info, nth_table)
+      
+      }
+      
+      if(i == "incubator"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        rename(facility_id = "site_uniq_id",
+               count_equip = "1_yes_how_many",
+               manufacturer = "2_manufacturer",
+               model_number = "3_model_number",
+               serial_number = "4_serial_number",
+               manufacture_date = "5_date_manufacture",
+               service_provider = "11_who_perform_services1") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider) %>% 
+        mutate(equip_type = i) %>% 
+        mutate_all(as.character)
+      
+      equip_info <- bind_rows(equip_info, nth_table)
+      
+      }
+      
+      if(i == "water_distiller"){
+      
+      nth_table <- sqlQuery(channel = conn2,
+                            query = paste("select * from",
+                                          i)) %>%
+        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
+        rename(facility_id = "site_uniq_id",
+               count_equip = "1_If_yes_how_many",
+               manufacturer = "2_manu",
+               model_number = "3_model",
+               serial_number = "4_serialnum",
+               manufacture_date = "5_date_manu",
+               service_provider = "11_yes_performs_services") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider) %>% 
+        mutate(equip_type = i) %>% 
+        mutate_all(as.character)
+      
+      equip_info <- bind_rows(equip_info, nth_table)
+    
+  }
+  
+  if(i == "bio_saf_cab"){
+    
+    nth_table <- sqlQuery(channel = conn2,
+                          query = paste("select * from",
+                                        i)) %>% 
+      filter(!is.na(.[[2]])) %>% 
+      rename(facility_id = "site_uniq_id",
+               count_equip = "1_biosafety_cabiNot",
+               manufacturer = "3_manufacturere",
+               model_number = "4_model_number",
+               serial_number = "5_serial_number",
+               manufacture_date = "6_date_manufacture",
+               service_provider = "12_perform_services") %>% 
+        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider) %>% 
+        mutate(equip_type = i) %>% 
+        mutate_all(as.character)
+    
+    equip_info <- bind_rows(equip_info, nth_table)
+    
+  }
+  
+}
+
+equip_info2 <- equip_info %>% 
+  mutate(count_equip = as.integer(count_equip),
+         manufacture_date = as.integer(str_sub(string = manufacture_date, start = 1, end = 4)))
+
+# Consider date formatting from Access
+# Organize facility data so as to later combine with equipment data
+
+# Important Notes
+
+# No PCR machines in data
+
+```
+
+## Facility Info
+
+The Facility Info DB contained information describing a different characteristic of laboratories evaluated (financial, equipment maintenance, etc). I was able to obtain all characteristics listed in the Introduction section from the lab_profile table.
+
+Laboratory GPS coordinates were not included in these data, laboratory address was included for most. I geocoded these addresses using the MapQuest API (see the [Final Report](https://paceafenet.github.io/final_report/) for full details). These addresses were of limited utility as many addresses were informal (e.g. off 107 S highway) or were simply the state the lab was located in. I assumed all addresses were in Nigeria. The geocoding API I used attempts to locate the address provided at the most granular level possible (actual address). If the address cannot be located then the geocoder will return the center point of the state (if identified), if neither the address nor state can be identified then the center point of Nigeria was returned.
+
+```{r eval=FALSE}
+
+# RELEVANT FACILITY INFO
+
+# May wnat to highlight discordance between facility-level information and the equipment inventory 
+
+conn <- odbcConnectAccess2007(access.file = "C:\\Users\\hze6950\\Desktop\\AFNET Project\\NMLStP data\\Revised data_March 8 2013\\westat_origDB 1.accdb")
+
+conn2 <- odbcConnectAccess2007(access.file = "C:\\Users\\hze6950\\Desktop\\AFNET Project\\NMLStP data\\Revised data_March 8 2013\\westat_origDB2.accdb")
 
 westat_tables <- sqlTables(channel = conn)
 
@@ -58,17 +452,11 @@ for(i in westat_tables$TABLE_NAME[westat_tables$TABLE_TYPE != "SYSTEM TABLE"]){
   
 }
 
-# same as westat 1 - assuming there's more (bind rows later)
-
 # equip_inventory
 
 equip_data <- sqlQuery(channel = conn,
                        query = "select * from equip_inventory",
                        max = 0)
-
-equip_data2 <- sqlQuery(channel = conn2,
-                       query = "select * from equip_inventory",
-                       max = 100)
 
 # equip_mant_calibration
 
@@ -88,10 +476,6 @@ lab_profile_data <- sqlQuery(channel = conn,
                              query = "select * from lab_profile",
                              max = 0)
 
-# Write all of these to disk
-
-conn2 <- odbcConnectAccess2007(access.file = "C:\\Users\\hze6950\\Desktop\\AFNET Project\\NMLStP data\\Revised data_March 8 2013\\westat_origDB2.accdb")
-
 westat_tables2 <- sqlTables(channel = conn2)
 
 table_info2 <- tibble()
@@ -106,180 +490,116 @@ for(i in westat_tables2$TABLE_NAME[westat_tables2$TABLE_TYPE != "SYSTEM TABLE"])
   table_info2 <- bind_rows(table_info2, nth_table)
 }
 
-# tt <- sqlQuery(channel = conn2,
-#                query = "select * from incubator",
-#                max = 0)
+lab_profile_data2 <- lab_profile_data %>% 
+  select(1:3, 13, 15) %>% 
+  mutate_all(as.character) %>% 
+  mutate(address_geocode = paste0(lab_address, ", Nigeria"))
 
-tt <- sqlQuery(channel = conn2,
-               query = "select * from incubator",
-               max = 0)
+tt <- pdquickmap::geocode(addresses = lab_profile_data2$address_geocode,
+              provider = "mapquest",
+              key = "Be4vSTacpJJcLYBXLp1Al50nI8LGGhtA")
 
-equip_info <- tibble(
-  facility_id = tt$site_uniq_id
-)
-
-# Try to harmonize all the columns in a logical way, if possible, then bind_rows to an empty table
-
-for(i in table_info2$TABLE_NAME[table_info2$TABLE_NAME %in% c("auto_cell_sorter", "autoclave", "bio_saf_cab", "cd4_analyzer", "centrifuge", "chem_fume_hood", "clean_bench", "gene_analyzer", "hema_analyzer", "incinerator", "incubator", "water_distiller")]){
-  
-  # i <- "auto_cell_sorter"
-  # i <- "bio_saf_cab"
-  
-  if(i %in% c("auto_cell_sorter", "autoclave", "cd4_analyzer", "centrifuge", "chem_fume_hood", "clean_bench", "gene_analyzer", "hema_analyzer", "incinerator", "incubator", "incubator")){
-    
-    # nth_table <- sqlQuery(channel = conn2,
-    #                       query = paste("select * from",
-    #                                     i)) %>%
-    #   filter(.[[2]] %in% c("Yes", "yes", "YES"))
-    
-    i <- "auto_cell_sorter"
-    
-    if(i == "auto_cell_sorter"){
-      
-      nth_table <- sqlQuery(channel = conn2,
-                            query = paste("select * from",
-                                          i)) %>%
-        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
-        rename(facility_id = "site_uniq_id",
-               count_equip = "1_yes_how_many",
-               manufacturer = "2_manfacturer",
-               model_number = "3_model_num",
-               serial_number = "4_serial_num",
-               manufacture_date = "5_date_manu",
-               service_provider = "11_who_perf_serv") %>% 
-        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider)
-      
-    }
-    
-    if(i == "autoclave"){
-      
-      nth_table <- sqlQuery(channel = conn2,
-                            query = paste("select * from",
-                                          i)) %>%
-        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
-        rename(facility_id = "site_uniq_id",
-               count_equip = "1a_how_many",
-               manufacturer = "3_manufacturer1",
-               model_number = "4_model_number1",
-               serial_number = "5_serial_number2",
-               manufacture_date = "6_date_manufacture2",
-               service_provider = "12_performs_service") %>% 
-        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider)
-      
-    }
-    
-    if(i == "cd4_analyzer"){
-      
-      nth_table <- sqlQuery(channel = conn2,
-                            query = paste("select * from",
-                                          i)) %>%
-        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
-        rename(facility_id = "site_uniq_id",
-               count_equip = "1_yes_how_many",
-               manufacturer = "2_manufacturer",
-               model_number = "3_model_number",
-               serial_number = "4_serial_number",
-               manufacture_date = "5_date_manu",
-               service_provider = "11_who_performs_services") %>% 
-        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider)
-      
-    }
-    
-    if(i == "centrifuge"){
-      
-      nth_table <- sqlQuery(channel = conn2,
-                            query = paste("select * from",
-                                          i)) %>%
-        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
-        rename(facility_id = "site_uniq_id",
-               count_equip = "1a_how_many1",
-               manufacturer = "4_manufacturer",
-               model_number = "5_model_number",
-               serial_number = "6_serial_number",
-               manufacture_date = "7_date_manufacture",
-               service_provider = "13_perform_service") %>% 
-        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider)
-      
-    }
-    
-    if(i == "chem_fume_hood"){
-      
-      nth_table <- sqlQuery(channel = conn2,
-                            query = paste("select * from",
-                                          i)) %>%
-        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
-        mutate(count_equip = 1) %>% 
-        rename(facility_id = "site_uniq_id",
-               manufacturer = "2_manufacturer",
-               model_number = "3_model_number",
-               serial_number = "4_serial_number",
-               manufacture_date = "5_date_manufacture",
-               service_provider = "11_perform_services") %>% 
-        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider)
-      
-    }
-    
-    if(i == "clean_bench"){
-      
-      nth_table <- sqlQuery(channel = conn2,
-                            query = paste("select * from",
-                                          i)) %>%
-        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
-        mutate(count_equip = 1) %>% 
-        rename(facility_id = "site_uniq_id",
-               manufacturer = "2_manufacturer5",
-               model_number = "3_model_number8",
-               serial_number = "4_serial_number7",
-               manufacture_date = "5_date_maufacture",
-               service_provider = "11_performs_services") %>% 
-        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider)
-      
-    }
-    
-    if(i == "gene_analyzer"){
-      
-      nth_table <- sqlQuery(channel = conn2,
-                            query = paste("select * from",
-                                          i)) %>%
-        filter(.[[2]] %in% c("Yes", "yes", "YES")) %>% 
-        rename(facility_id = "site_uniq_id",
-               count_equip = "1_yes_many",
-               manufacturer = "2_Manufact",
-               model_number = "3_model_num",
-               serial_number = "4_serial_num",
-               manufacture_date = "5_date_Manuf",
-               service_provider = "11_who_perf_serv") %>% 
-        select(facility_id, count_equip, manufacturer, model_number, serial_number, manufacture_date, service_provider)
-      
-    }
-    
-    # Here - continue above pattern and finish the equipment list, when done; get rid of intial if() statement, add a bind_rows for each piece and put in empty df
-    
-  }
-  
-  
-  # This one will be different
-  if(i == "bio_saf_cab"){
-    
-    nth_table <- sqlQuery(channel = conn2,
-                          query = paste("select * from",
-                                        i)) %>% 
-      filter(!is.na(.[[2]]))
-    
-    assign(paste0(i, "_df"), nth_table)
-    
-    colnames(nth_table)
-    
-  }
-  
-}
-
-# Important Notes
-
-# No PCR machines in data
+lab_profile_data3 <- left_join(x = lab_profile_data2,
+                               y = tt,
+                               by = c("address_geocode" = "address"))
 
 ```
 
+## Combining Facility Info to Equipment Info
+
+A unique facility ID was assigned to each lab as well as the equipment described. I joined the equipment information to the facility information.
+
+```{r eval=FALSE}
+
+equip_info3 <- left_join(x = equip_info2, y = lab_profile_data3, by = c("facility_id" = "site_uniq_id"))
+
+```
+
+```{r eval=FALSE}
+write_csv(equip_info3,
+          path = "data//lab_equip_data.csv")
+
+```
+
+## Description of Deficiencies 
+
+The most notable deficiency with the equipment data is that it is not a complete inventory of each piece of equipment at each facility. 
+
+In the table below we see that for 8,136 equipment items there was nothing listed for equipment count even though  a serial number may still have been listed for some of these. Next, and most important to note, 2, 3, 4, or 6 was listed for 1,943 rows in the Equipment DB, but at most one serial number was listed for equipment.
+
+```{r results='asis'}
+
+equip_info <- read_csv(file = "data//lab_equip_data.csv")
+
+equip_cnt <- equip_info %>% 
+  group_by(count_equip) %>% 
+  tally() %>% 
+  add_row(count_equip = "Total",
+          n = sum(.$n, na.rm = T))
+
+kable_styling(kable(equip_cnt,
+                    caption = "Frequency of Responses: Equipment Count",
+                    col.names = c("Equipment Count Response", "Count")))
+
+```
+
+Next, in the table below it is clear that equipment information including serial number, model number, service provider, and manufacturer were most frequently missing in these data. Recall that rows from the Equipment DB were only used where the equipment was denoted as present at the facility, thus the information in the table describes how often the characteristic was missing from the data where the equipment was present at the facility. 
+
+```{r results='asis'}
+
+# Describe completeness of variables
+
+completeness_combined <- tibble()
+
+for(i in colnames(equip_info[2:12])){
+  
+  # i <- colnames(equip_info)[2]
+  
+  tt <- tibble(
+    missing = sum(is.na(equip_info[[i]])),
+    not_missing = sum(!is.na(equip_info[[i]]))
+  ) %>% 
+    mutate(total = missing + not_missing,
+           pct_missing = round((missing/total)*100, digits = 2),
+           equip_feature = i)
+  
+  completeness_combined <- bind_rows(completeness_combined, tt)
+  
+}
+
+completeness_combined2 <- completeness_combined %>% 
+  mutate(equip_feature = fct_recode(as.factor(equip_feature),
+                                   `Equipment Count` = "count_equip",
+                                   Manufacturer = "manufacturer",
+                                   `Model Number` = "model_number",
+                                   `Serial Number` = "serial_number",
+                                   `Manufacture Date` = "manufacture_date",
+                                   `Service Provider` = "service_provider",
+                                   `Equipment Type` = "equip_type",
+                                   `Laboratory Name` = "lab_name",
+                                   `Laboratory Address` = "lab_address",
+                                   `Laboratory Level` = "lab_level",
+                                   `Laboratory Affiliation` = "lab_affi"),
+         equip_feature = as.character(equip_feature)) %>% 
+  select(5, 1:4) %>% 
+  arrange(desc(pct_missing)) %>% 
+  mutate(pct_missing = paste0(pct_missing, "%"))
+
+kable_styling(kable(completeness_combined2,
+                    caption = "Description of Lab Equipment Characteristics",
+                    col.names = c("Equipment Feature",
+                                  "Missing",
+                                  "Not Missing",
+                                  "Total",
+                                  "Percent Missing")))
+
+```
+
+## Conclusions and Recommendations
+
+1. For more accurate location of lab equipment we would will need latitude and longitudes of labs, or at least more descriptive addresses.
+2. These data can be used for demonstration as they are now, but the eTool will be most useful with a complete inventory of equipment at each lab.
+3. Information initially identified as essential including calibration dates which could be used to identify when equipment is due for maintenance, calibration, or retirement is largely dependent on manufacturer specifications. From the data as it is currently, it would not be possible to identify when equipment should next be serviced. This point will require further discussion. 
 
 # Cameroon
 
