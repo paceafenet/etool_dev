@@ -6,5 +6,5 @@ Below are several-related links
 
 1. [Weekly Progress Reports](https://paceafenet.github.io/progress_reports/)
 2. [Project Final Report](https://paceafenet.github.io/final_report/)
-3. [Test](https://github.com/paceafenet/etool_dev/blob/master/existing_lab_data_exploration.md)
+3. [Report Describing Existing Data](https://github.com/paceafenet/etool_dev/blob/master/existing_lab_data_exploration.md)
 

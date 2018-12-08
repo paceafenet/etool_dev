@@ -5,8 +5,7 @@
     -   [Combining Facility Info to Equipment
         Info](#combining-facility-info-to-equipment-info)
     -   [Description of Deficiencies](#description-of-deficiencies)
-    -   [Conclusions and
-        Recommendations](#conclusions-and-recommendations)
+    -   [Conclusions and Recommendations](#conclusions-and-recommendations)
 -   [Cameroon](#cameroon)
 
 Introduction
@@ -52,8 +51,8 @@ Information DB, Equipment Information DB, or absent.
 -   Serial number (Equipment Information)
 -   Date equipment became active at the facility (absent)
 -   Date equipment no longer viable (absent)
--   Equipment location ‚Äì facility name (Facility Information)
--   Equipment location ‚Äì GPS coordinates (geocoded from facility
+-   Equipment location ñ facility name (Facility Information)
+-   Equipment location ñ GPS coordinates (geocoded from facility
     address)
 -   Ownership type (Government, private owned, etc) (Facility
     Information)
@@ -102,7 +101,7 @@ was not available in these data.
 Although the tables in the Equipment DB contain different information
 depending on the equipment described, I was able to obtain all
 characteristics listed under the Introduction section listed with
-‚ÄúEquipment Information‚Äù next to the characteristic. I left out all data
+ìEquipment Informationî next to the characteristic. I left out all data
 in the Equipment DB where the facility did not respond that they had the
 equipment being described.
 
@@ -119,7 +118,7 @@ address was included for most. I geocoded these addresses using the
 MapQuest API (see the [Final
 Report](https://paceafenet.github.io/final_report/) for full details).
 These addresses were of limited utility as many addresses were informal
-(e.g.¬†off 107 S highway) or were simply the state the lab was located
+(e.g.off 107 S highway) or were simply the state the lab was located
 in. I assumed all addresses were in Nigeria. The geocoding API I used
 attempts to locate the address provided at the most granular level
 possible (actual address). If the address cannot be located then the
@@ -440,6 +439,7 @@ Equipment Type
 </tr>
 </tbody>
 </table>
+
 Conclusions and Recommendations
 -------------------------------
 

@@ -545,6 +545,7 @@ kable_styling(kable(equip_cnt,
 
 Next, in the table below it is clear that equipment information including serial number, model number, service provider, and manufacturer were most frequently missing in these data. Recall that rows from the Equipment DB were only used where the equipment was denoted as present at the facility, thus the information in the table describes how often the characteristic was missing from the data where the equipment was present at the facility. 
 
+
 ```{r results='asis'}
 
 # Describe completeness of variables
@@ -595,7 +596,9 @@ kable_styling(kable(completeness_combined2,
 
 ```
 
+
 ## Conclusions and Recommendations
+
 
 1. For more accurate location of lab equipment we would will need latitude and longitudes of labs, or at least more descriptive addresses.
 2. These data can be used for demonstration as they are now, but the eTool will be most useful with a complete inventory of equipment at each lab.
