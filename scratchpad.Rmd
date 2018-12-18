@@ -61,6 +61,7 @@ This is a test
 renderSparkline({
   tt_sparkdata <- iris %>%
     filter(Species == input$species)
+    # filter(Species == "versicolor")
   
   sparkline(tt_sparkdata[[1]])
 })
