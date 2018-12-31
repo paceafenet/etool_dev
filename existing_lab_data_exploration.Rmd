@@ -1,21 +1,15 @@
 ---
-# title: "Existing Lab Data Exploration"
-# description: |
-#  This report contains a description of the existing data from Cameroon and Nigeria
-# author:
-#   - name: Travis Sondgerath
-# date: '`r Sys.Date()`'
-# output:
-#   radix::radix_article:
-#     toc: true
-#     toc_depth: 2
-    
 title: "Existing Lab Data Exploration"
+description: |
+ This report contains a description of the existing data from Cameroon and Nigeria
+author:
+  - name: Travis Sondgerath
+date: '`r Sys.Date()`'
 output:
   md_document:
     toc: true
     toc_depth: 2
-    # variant: markdown_github
+    preserve_yaml: true
 always_allow_html: yes
 ---
 
@@ -122,12 +116,6 @@ for(i in westat_tables$TABLE_NAME[westat_tables$TABLE_TYPE != "SYSTEM TABLE"]){
   
 }
 
-# RELEVANT EQUIPMENT INFORMATION
-
-# tt <- sqlQuery(channel = conn2,
-#                query = "select * from incubator",
-#                max = 0)
-
 tt <- sqlColumns(channel = conn2,
                  sqtable = "auto_cell_sorter")
 
@@ -145,8 +133,6 @@ for(i in westat_tables2$TABLE_NAME[westat_tables2$TABLE_TYPE != "SYSTEM TABLE"])
 }
 
 equip_info <- tibble()
-
-# Try to harmonize all the columns in a logical way, if possible, then bind_rows to an empty table
 
 for(i in table_info2$TABLE_NAME[table_info2$TABLE_NAME %in% c("auto_cell_sorter", "autoclave", "bio_saf_cab", "cd4_analyzer", "centrifuge", "chem_fume_hood", "clean_bench", "gene_analyzer", "hema_analyzer", "incinerator", "incubator", "water_distiller")]){
   
@@ -412,13 +398,6 @@ equip_info2 <- equip_info %>%
   mutate(count_equip = as.integer(count_equip),
          manufacture_date = as.integer(str_sub(string = manufacture_date, start = 1, end = 4)))
 
-# Consider date formatting from Access
-# Organize facility data so as to later combine with equipment data
-
-# Important Notes
-
-# No PCR machines in data
-
 ```
 
 ## Facility Info
@@ -428,10 +407,6 @@ The Facility Info DB contained information describing a different characteristic
 Laboratory GPS coordinates were not included in these data, laboratory address was included for most. I geocoded these addresses using the MapQuest API (see the [Final Report](https://paceafenet.github.io/final_report/) for full details). These addresses were of limited utility as many addresses were informal (e.g. off 107 S highway) or were simply the state the lab was located in. I assumed all addresses were in Nigeria. The geocoding API I used attempts to locate the address provided at the most granular level possible (actual address). If the address cannot be located then the geocoder will return the center point of the state (if identified), if neither the address nor state can be identified then the center point of Nigeria was returned.
 
 ```{r eval=FALSE}
-
-# RELEVANT FACILITY INFO
-
-# May wnat to highlight discordance between facility-level information and the equipment inventory 
 
 conn <- odbcConnectAccess2007(access.file = "C:\\Users\\hze6950\\Desktop\\AFNET Project\\NMLStP data\\Revised data_March 8 2013\\westat_origDB 1.accdb")
 
@@ -603,6 +578,26 @@ kable_styling(kable(completeness_combined2,
 1. For more accurate location of lab equipment we would will need latitude and longitudes of labs, or at least more descriptive addresses.
 2. These data can be used for demonstration as they are now, but the eTool will be most useful with a complete inventory of equipment at each lab.
 3. Information initially identified as essential including calibration dates which could be used to identify when equipment is due for maintenance, calibration, or retirement is largely dependent on manufacturer specifications. From the data as it is currently, it would not be possible to identify when equipment should next be serviced. This point will require further discussion. 
+
+## Additional Analysis
+
+During the Dec 18th call it was asked that I also summarize the service providers in the existing Nigeria data. Service provider was left blank in 13,548 (87%) responses during the prior assessment. Recall that the structure of the data is that all labs were asked if they had any of a specific kind of equipment. The data I am describing in this report is where the facility responded that they have at least one of a certain kind of equipment.
+
+Where a response was given, respondents often responded with the company providing service. However, many also simply responded Yes/No or generally who provided service (e.g. 'contractor').
+
+GEM Laboratories was the most commonly named provider. 
+
+```{r}
+provider_agencies <- equip_info %>% 
+  group_by(service_provider) %>% 
+  tally() %>% 
+  arrange(desc(n)) %>% 
+  mutate(pct_of_total = round((n/sum(.$n, na.rm = T))*100, digits = 1))
+
+kable_styling(kable(provider_agencies,
+                    caption = "Frequency of Service Providers",
+                    col.names = c("Service Provider", "Count", "PCT of Total")))
+```
 
 # Cameroon
 

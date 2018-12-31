@@ -1,3 +1,18 @@
+---
+title: "Existing Lab Data Exploration"
+description: |
+ This report contains a description of the existing data from Cameroon and Nigeria
+author:
+  - name: Travis Sondgerath
+date: '2018-12-27'
+output:
+  md_document:
+    toc: true
+    toc_depth: 2
+    preserve_yaml: true
+always_allow_html: yes
+---
+
 -   [Introduction](#introduction)
 -   [Nigeria](#nigeria)
     -   [Equipment Info](#equipment-info)
@@ -5,7 +20,9 @@
     -   [Combining Facility Info to Equipment
         Info](#combining-facility-info-to-equipment-info)
     -   [Description of Deficiencies](#description-of-deficiencies)
-    -   [Conclusions and Recommendations](#conclusions-and-recommendations)
+    -   [Conclusions and
+        Recommendations](#conclusions-and-recommendations)
+    -   [Additional Analysis](#additional-analysis)
 -   [Cameroon](#cameroon)
 
 Introduction
@@ -51,8 +68,8 @@ Information DB, Equipment Information DB, or absent.
 -   Serial number (Equipment Information)
 -   Date equipment became active at the facility (absent)
 -   Date equipment no longer viable (absent)
--   Equipment location ñ facility name (Facility Information)
--   Equipment location ñ GPS coordinates (geocoded from facility
+-   Equipment location ‚Äì facility name (Facility Information)
+-   Equipment location ‚Äì GPS coordinates (geocoded from facility
     address)
 -   Ownership type (Government, private owned, etc) (Facility
     Information)
@@ -101,7 +118,7 @@ was not available in these data.
 Although the tables in the Equipment DB contain different information
 depending on the equipment described, I was able to obtain all
 characteristics listed under the Introduction section listed with
-ìEquipment Informationî next to the characteristic. I left out all data
+‚ÄúEquipment Information‚Äù next to the characteristic. I left out all data
 in the Equipment DB where the facility did not respond that they had the
 equipment being described.
 
@@ -118,7 +135,7 @@ address was included for most. I geocoded these addresses using the
 MapQuest API (see the [Final
 Report](https://paceafenet.github.io/final_report/) for full details).
 These addresses were of limited utility as many addresses were informal
-(e.g.off 107 S highway) or were simply the state the lab was located
+(e.g.¬†off 107 S highway) or were simply the state the lab was located
 in. I assumed all addresses were in Nigeria. The geocoding API I used
 attempts to locate the address provided at the most granular level
 possible (actual address). If the address cannot be located then the
@@ -439,7 +456,6 @@ Equipment Type
 </tr>
 </tbody>
 </table>
-
 Conclusions and Recommendations
 -------------------------------
 
@@ -456,5 +472,933 @@ Conclusions and Recommendations
     would not be possible to identify when equipment should next be
     serviced. This point will require further discussion.
 
+Additional Analysis
+-------------------
+
+During the Dec 18th call it was asked that I also summarize the service
+providers in the existing Nigeria data. Service provider was left blank
+in 13,548 (87%) responses during the prior assessment. Recall that the
+structure of the data is that all labs were asked if they had any of a
+specific kind of equipment. The data I am describing in this report is
+where the facility responded that they have at least one of a certain
+kind of equipment.
+
+Where a response was given, respondents often responded with the company
+providing service. However, many also simply responded Yes/No or
+generally who provided service (e.g. ‚Äòcontractor‚Äô).
+
+GEM Laboratories was the most commonly named provider.
+
+<table class="table" style="margin-left: auto; margin-right: auto;">
+<caption>
+Frequency of Service Providers
+</caption>
+<thead>
+<tr>
+<th style="text-align:left;">
+Service Provider
+</th>
+<th style="text-align:right;">
+Count
+</th>
+<th style="text-align:right;">
+PCT of Total
+</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left;">
+NA
+</td>
+<td style="text-align:right;">
+13548
+</td>
+<td style="text-align:right;">
+87.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GEM LABORATORIES
+</td>
+<td style="text-align:right;">
+210
+</td>
+<td style="text-align:right;">
+1.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+Yes
+</td>
+<td style="text-align:right;">
+122
+</td>
+<td style="text-align:right;">
+0.8
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+No
+</td>
+<td style="text-align:right;">
+109
+</td>
+<td style="text-align:right;">
+0.7
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BIOMEDICAL ENGINEER
+</td>
+<td style="text-align:right;">
+77
+</td>
+<td style="text-align:right;">
+0.5
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TEXAN
+</td>
+<td style="text-align:right;">
+61
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+APIN ENGINEER
+</td>
+<td style="text-align:right;">
+60
+</td>
+<td style="text-align:right;">
+0.4
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HOSPITAL BIOMEDICAL ENGINEER
+</td>
+<td style="text-align:right;">
+48
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EZEKIEL PWANA(HAVARD APIN ENGENIER)
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HARRAN PEFFER ENGINEER \[APIN\]
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VENDOR BY MOD
+</td>
+<td style="text-align:right;">
+47
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HMB VENDOR
+</td>
+<td style="text-align:right;">
+44
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MAINTENANCE MANAGER
+</td>
+<td style="text-align:right;">
+44
+</td>
+<td style="text-align:right;">
+0.3
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TEXAN ENGINEERING
+</td>
+<td style="text-align:right;">
+33
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EXTERNAL
+</td>
+<td style="text-align:right;">
+30
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GEM LAB
+</td>
+<td style="text-align:right;">
+28
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+VENDOR DOD
+</td>
+<td style="text-align:right;">
+28
+</td>
+<td style="text-align:right;">
+0.2
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DOD VENDOR
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EXTERNALLY ARRANGED
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HAIER THERMOCOOL
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LOCAL ENGINEER
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SURGIFRIEND
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AIR FORCE TECHNICAL
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+APIN PROG. SERVICE ENGR
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BIOMEDICAL ENGER
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BIOTEC ENGINEER
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CONTRACTORS/ENGINEER
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EAGLE SURGICAL
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EXTERNAL ENGINEER
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EXTERNAL VENDOR SENELAB
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EXTERNOV ENGINEER
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HAVARD PEFFER ENGINEER \[ AOIN\]
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IN HOUSE BIO MED ENGINEER
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MR ALABI
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+N/A
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PEPFAR VENDOR
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+TECHNICIAN
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+THE SCIEN
+</td>
+<td style="text-align:right;">
+16
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+INDIAN SCIENTIFIC
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LABORATORY ATTENDANTS/ ATTENDANTS
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+POOR CONTACT, LEAKING
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+THE MANUCFACTURING COMPANY
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AGENT INV NIG LTD
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+AGENT INVESTMENT NIGERIA LTD
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+APIN SERVICE ENGR
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BD LOCAL REP
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BIOMED ENGR
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BIOMEDICAL ENGINEERING
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+BIOMEDICAL NEMISAM ENGINEER
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+CENTRACTOR
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+DIRECTOR
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ENGINEER
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EPIC
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EXTENAL SERVICE SYSTEM
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EXTERNAL CONTRACTOR
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+external service
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EXTERNAL TECHNICIANS
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+EXTERNAL VENDOR
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FHI
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+FHI 360 EUGI
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GEM LAB ONITSHA
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GEM LABORTORY
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GEN LAB
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+GHAIN
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HAVARD PEFFER ENGINEER \[APIN\]
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HOSPITAL ENGINEER
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+HOSPITAL MANAGEMENT BOARD & KGDN TECH LTD
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IHVN
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+IN - HOUSE
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+LIFESIGN NIG.LTD
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MAINTENANCE OFFICER
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MR CHUKWU OMORUYI
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MR OMORUYI CHUKS, MR USEH, UBONG
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+MR OSHILOYE
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+ONCE THERE IS FAULT, WE LOOK FOR PEOPLE TO REPAIR IT
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+PEFFER ENGINEER \[APIN\[\]
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SENELAB
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+SERVICE CONTRACT BY AHNI
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+STAFF IN HOUSE
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+THE MANUFACTURER
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+<tr>
+<td style="text-align:left;">
+URC AGENT
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+0.1
+</td>
+</tr>
+</tbody>
+</table>
 Cameroon
 ========

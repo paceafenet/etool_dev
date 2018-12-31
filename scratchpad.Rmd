@@ -82,6 +82,26 @@ renderSparkline({
 ```
 
 ```{r}
+# Other example below in comments
+
+# spk_data <- nhsn_events %>% 
+#   select(1, 3:6) %>% 
+#   inner_join(x = ., 
+#              y = tt <- nhsn_events %>% filter(collab_assign == "selected"), 
+#              by = "CO_ID") %>% 
+#   arrange(HOSP_NAME.x) %>% 
+#   select(2:5) %>% 
+#   t() %>% 
+#   as_tibble()
+
+# nhsn_events_collab <- nhsn_events %>% 
+#   filter(collab_assign == "selected") %>% 
+#   arrange(HOSP_NAME.x)
+# 
+# colnames(spk_data) <- sort(nhsn_events$HOSP_NAME.x[nhsn_events$collab_assign == "selected"])
+
+# spk_chr(spk_data[[2]], min = 0, max = 200),
+
 renderDataTable({
   tt_sparkdata <- iris %>%
     filter(Species == input$species)
