@@ -24,8 +24,9 @@ library(lubridate)
 library(rmarkdown)
 library(leaflet)
 library(tidyr)
+library(ggplot2)
 
-curr_date <- mdy("1/1/2017")
+curr_date <- mdy("5/1/2016")
 
 googlesheets::gs_auth(token = "shiny_app_token.rds")
 my_sheets <- googlesheets::gs_ls()
@@ -53,23 +54,24 @@ ss_data <- googlesheets::gs_read_csv(ss) %>%
                                                  false = "blue")))
 ```
 
-{.sidebar}
+Inputs {.sidebar}
+-------------------------------------
 
 ```{r}
 
-# materialSwitch(inputId = "attn_toggle",
-#                label = "Toggle to Facilities with Equip Requiring Attention:",
-#                status = "info")
-
 pickerInput(inputId = "attn_level",
             label = "Choose Facilities with Equip Requiring Attention:",
-            choices = unique(ss_data$requires_attn),
-            selected = unique(ss_data$requires_attn),
+            choices = as.character(unique(ss_data$requires_attn)),
+            selected = as.character(unique(ss_data$requires_attn)),
+            options = list(
+              `actions-box` = T,
+              size = 10,
+              `selected-text-format` = "count > 3"),
             multiple = T)
 
 ```
 
-Row {data-height=650}
+Row 1 {.tabset .tabset-fade data-height=800}
 -----------------------------------------------------------------------
 
 ### Leaflet
@@ -78,51 +80,158 @@ Row {data-height=650}
 
 renderLeaflet({
 
-# attn_flag <- ""
-# attn_flag[input$attn_toggle == TRUE] <- c("red", "yellow")
-# attn_flag[input$attn_toggle == FALSE] <- c("red", "yellow", "blue")
-
-tt <- ss_data %>% 
-  filter(requires_attn %in% c(input$attn_level)) %>% 
-  # filter(requires_attn %in% c(attn_flag)) %>% 
+plot1 <- ss_data %>% 
   group_by(facility, lat, long, requires_attn) %>% 
   tally() %>% 
-  spread(key = requires_attn, value = n) %>% 
-  ungroup() %>% 
+  spread(key = requires_attn, value = n) %>%
+  ungroup() %>%
   mutate(requires_attn = if_else(condition = red > 0,
                                  true = "red",
                                  false = if_else(yellow > 0,
                                                  true = "yellow",
                                                  false = "blue")),
          lat = jitter(lat, factor = 1),
-         long = jitter(long, factor = 1)) %>% 
-  leaflet() %>% 
+         long = jitter(long, factor = 1)) %>%
+  filter(requires_attn %in% c(input$attn_level)) %>%
+  # filter(requires_attn == "red") %>%
+  leaflet() %>%
   addTiles() %>%
-  addCircleMarkers(lng = ~long, 
-                   lat = ~lat, 
+  addCircleMarkers(lng = ~long,
+                   lat = ~lat,
                    popup = ~facility,
                    color = ~requires_attn,
                    fill = F)
 
-tt
+plot1
 
 })
 ```
 
-Row {.tabset .tabset-fade data-height=350}
+### Data Table
+
+```{r}
+renderDataTable({
+  
+  ss_data %>% 
+    filter(requires_attn %in% c(input$attn_level)) %>%
+    select(7, 1:2, 6, 12:15) %>% 
+    datatable(rownames = F,
+              fillContainer = T,
+              filter = "none",
+              selection = "single") #%>% # NEED TO CREATE ANOTHER VARIABLE FOR EACH DATE IN THE SETUP THAT WILL GIVE THE BACKGROUND COLOR FOR EACH DATE (WHERE APPLICABLE) - HIDE THESE DUMMY COLUMNS USING THE COLUMNDEFS FUNCTION IN THE OPTIONS STATEMENT (SEE DT DOCS ABOUT BACKGROUND COLORS)
+    # formatStyle("date_not_viable",
+    #             backgroundColor = styleInterval(c(date)))
+  
+})
+```
+
+
+Row 2 {.tabset .tabset-fade}
 -----------------------------------------------------------------------
 
-### Chart B
+### By Attention Category
 
 ```{r}
 
+tt <- ss_data %>% 
+  group_by(requires_attn) %>% 
+  tally() %>% 
+  ungroup() %>% 
+  mutate(attn_label = if_else(condition = requires_attn == "blue",
+                              true = "OK",
+                              false = if_else(condition = requires_attn == "yellow",
+                                              true = "Soon",
+                                              false = "Immediate")))
+
+plot2 <- tt %>% 
+  ggplot(aes(x = attn_label, weight = n, fill = attn_label)) +
+  geom_bar() +
+  scale_fill_manual(values = c("red", "blue", "yellow")) +
+  scale_y_continuous(limits = c(0, 10000), breaks = seq(0, 10000, 1000)) +
+  theme_classic() +
+  theme(legend.position = "none",
+        axis.title = element_blank(),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold"))
+
+# tt
+
+p1 <- plotly::ggplotly(plot2)
+
+p1
+
+kableExtra::kable_styling(knitr::kable(tt[ , c(3, 2)]))
+
 ```
 
-Row {data-height=350}
------------------------------------------------------------------------
-
-### Chart C
+### By Facility
 
 ```{r}
+# Number requiring immediate attention by facility
+
+tt2 <- ss_data %>% 
+  filter(requires_attn == "red") %>% 
+  group_by(facility) %>% 
+  tally()
+
+plot3 <- tt2 %>% 
+  ggplot(aes(x = facility, weight = n)) +
+  geom_bar(fill = "white", color = "black") +
+  # scale_y_continuous(limits = c(0, 10000), breaks = seq(0, 5000, 500)) +
+  theme_classic() +
+  theme(legend.position = "none",
+        axis.title = element_blank(),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold"))
+
+p2 <- plotly::ggplotly(plot3)
+
+p2
+
+# tt2
+
+kableExtra::kable_styling(knitr::kable(tt2))
 
 ```
+
+### By Lab Level
+
+```{r}
+# Number requiring attention by level
+
+tt3 <- ss_data %>% 
+  filter(requires_attn == "red") %>% 
+  group_by(lab_level) %>% 
+  tally()
+
+plot4 <- tt3 %>% 
+  ggplot(aes(x = lab_level, weight = n)) +
+  geom_bar(fill = "white", color = "black") +
+  # scale_y_continuous(limits = c(0, 10000), breaks = seq(0, 5000, 500)) +
+  theme_classic() +
+  scale_x_discrete(limits = c("district", "regional", "national", "other")) +
+  ggtitle("Equipment Requiring Immediate Attention") +
+  theme(legend.position = "none",
+        axis.title = element_blank(),
+        axis.text.x = element_text(face = "bold"),
+        axis.text.y = element_text(face = "bold"))
+
+# tt3
+
+p4 <- plotly::ggplotly(plot4)
+
+p4
+
+kableExtra::kable_styling(knitr::kable(tt3))
+
+```
+
+
+
+
+
+
+
+
+
+
