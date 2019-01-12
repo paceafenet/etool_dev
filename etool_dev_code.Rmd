@@ -51,7 +51,31 @@ ss_data <- googlesheets::gs_read_csv(ss) %>%
                                                    next_calibration - curr_date < 10 |
                                                    next_maintenance - curr_date < 10,
                                                  true = "yellow",
-                                                 false = "blue")))
+                                                 false = "blue")),
+         requires_attn_label = if_else(condition = date_not_viable < curr_date |
+                                   next_calibration < curr_date |
+                                   next_maintenance < curr_date,
+                                 true = "Immediately",
+                                 false = if_else(condition = date_not_viable - curr_date < 10 |
+                                                   next_calibration - curr_date < 10 |
+                                                   next_maintenance - curr_date < 10,
+                                                 true = "Soon",
+                                                 false = "OK")),
+         viable_attn = if_else(condition = date_not_viable < curr_date,
+                               true = 3,
+                               false = if_else(condition = date_not_viable - curr_date < 10,
+                                               true = 2,
+                                               false = 1)),
+         calibration_attn = if_else(condition = next_calibration < curr_date,
+                               true = 3,
+                               false = if_else(condition = next_calibration - curr_date < 10,
+                                               true = 2,
+                                               false = 1)),
+         maintenance_attn = if_else(condition = next_maintenance < curr_date,
+                               true = 3,
+                               false = if_else(condition = next_maintenance - curr_date < 10,
+                                               true = 2,
+                                               false = 1)))
 ```
 
 Inputs {.sidebar}
@@ -61,8 +85,18 @@ Inputs {.sidebar}
 
 pickerInput(inputId = "attn_level",
             label = "Choose Facilities with Equip Requiring Attention:",
-            choices = as.character(unique(ss_data$requires_attn)),
-            selected = as.character(unique(ss_data$requires_attn)),
+            choices = as.character(unique(ss_data$requires_attn_label)),
+            selected = as.character(unique(ss_data$requires_attn_label)),
+            options = list(
+              `actions-box` = T,
+              size = 10,
+              `selected-text-format` = "count > 3"),
+            multiple = T)
+
+pickerInput(inputId = "lab_select",
+            label = "Choose a Facility:",
+            choices = as.character(unique(ss_data$facility)),
+            selected = as.character(unique(ss_data$facility)),
             options = list(
               `actions-box` = T,
               size = 10,
@@ -74,32 +108,37 @@ pickerInput(inputId = "attn_level",
 Row 1 {.tabset .tabset-fade data-height=800}
 -----------------------------------------------------------------------
 
-### Leaflet
+### Situation Map
 
 ```{r}
 
 renderLeaflet({
 
 plot1 <- ss_data %>% 
-  group_by(facility, lat, long, requires_attn) %>% 
+  group_by(facility, lat, long, requires_attn_label) %>% 
   tally() %>% 
-  spread(key = requires_attn, value = n) %>%
+  spread(key = requires_attn_label, value = n) %>%
   ungroup() %>%
-  mutate(requires_attn = if_else(condition = red > 0,
-                                 true = "red",
-                                 false = if_else(yellow > 0,
-                                                 true = "yellow",
-                                                 false = "blue")),
+  mutate(requires_attn_label = if_else(condition = Immediately > 0,
+                                 true = "Immediately",
+                                 false = if_else(Soon > 0,
+                                                 true = "Soon",
+                                                 false = "OK")),
+         requires_attn_color = if_else(condition = requires_attn_label == "Immediately",
+                                   true = "red",
+                                   false = if_else(condition = requires_attn_label == "Soon",
+                                                   true = "yellow",
+                                                   false = "blue")),
          lat = jitter(lat, factor = 1),
          long = jitter(long, factor = 1)) %>%
-  filter(requires_attn %in% c(input$attn_level)) %>%
+  filter(requires_attn_label %in% c(input$attn_level)) %>%
   # filter(requires_attn == "red") %>%
   leaflet() %>%
   addTiles() %>%
   addCircleMarkers(lng = ~long,
                    lat = ~lat,
                    popup = ~facility,
-                   color = ~requires_attn,
+                   color = ~requires_attn_color,
                    fill = F)
 
 plot1
@@ -107,18 +146,35 @@ plot1
 })
 ```
 
-### Data Table
+### Edit Data
 
 ```{r}
 renderDataTable({
   
   ss_data %>% 
-    filter(requires_attn %in% c(input$attn_level)) %>%
-    select(7, 1:2, 6, 12:15) %>% 
+    filter(requires_attn_label %in% c(input$attn_level)) %>%
+    filter(facility %in% c(input$lab_select)) %>% 
+    select(7, 1:2, 6, 12:15, 26:28) %>% 
     datatable(rownames = F,
               fillContainer = T,
               filter = "none",
-              selection = "single") #%>% # NEED TO CREATE ANOTHER VARIABLE FOR EACH DATE IN THE SETUP THAT WILL GIVE THE BACKGROUND COLOR FOR EACH DATE (WHERE APPLICABLE) - HIDE THESE DUMMY COLUMNS USING THE COLUMNDEFS FUNCTION IN THE OPTIONS STATEMENT (SEE DT DOCS ABOUT BACKGROUND COLORS)
+              selection = "single",
+              options = list(
+    columnDefs = list(list(targets = c(8:10), visible = FALSE))
+    )) %>% 
+    formatStyle(columns = "date_not_viable",
+                valueColumns = "viable_attn",
+                backgroundColor = styleEqual(c(3, 2, 1), c("red", "yellow", "white")),
+                color = styleEqual(c(3, 2, 1), c("white", "black", "black"))) %>% 
+    formatStyle(columns = "next_calibration",
+                valueColumns = "calibration_attn",
+                backgroundColor = styleEqual(c(3, 2, 1), c("red", "yellow", "white")),
+                color = styleEqual(c(3, 2, 1), c("white", "black", "black"))) %>%
+    formatStyle(columns = "next_maintenance",
+                valueColumns = "maintenance_attn",
+                backgroundColor = styleEqual(c(3, 2, 1), c("red", "yellow", "white")))
+  
+  # NEED TO CREATE ANOTHER VARIABLE FOR EACH DATE IN THE SETUP THAT WILL GIVE THE BACKGROUND COLOR FOR EACH DATE (WHERE APPLICABLE) - HIDE THESE DUMMY COLUMNS USING THE COLUMNDEFS FUNCTION IN THE OPTIONS STATEMENT (SEE DT DOCS ABOUT BACKGROUND COLORS)
     # formatStyle("date_not_viable",
     #             backgroundColor = styleInterval(c(date)))
   
@@ -129,7 +185,7 @@ renderDataTable({
 Row 2 {.tabset .tabset-fade}
 -----------------------------------------------------------------------
 
-### By Attention Category
+### By Attention Category {.no-mobile}
 
 ```{r}
 
@@ -164,7 +220,7 @@ kableExtra::kable_styling(knitr::kable(tt[ , c(3, 2)]))
 
 ```
 
-### By Facility
+### By Facility {.no-mobile}
 
 ```{r}
 # Number requiring immediate attention by facility
@@ -194,7 +250,7 @@ kableExtra::kable_styling(knitr::kable(tt2))
 
 ```
 
-### By Lab Level
+### By Lab Level {.no-mobile}
 
 ```{r}
 # Number requiring attention by level

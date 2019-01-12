@@ -1,0 +1,12 @@
+name: etool_dev
+title: etool_dev
+username:
+account: travis-shinin-spot
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 637908
+bundleId: 1810965
+url: https://travis-shinin-spot.shinyapps.io/etool_dev/
+when: 1547327729.97905
+asMultiple: FALSE
+asStatic: FALSE
