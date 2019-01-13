@@ -147,6 +147,25 @@ ss <- gs_key(sheet_key)  # Defines the sheet I want to interact with
 ss_data <- gs_read_csv(ss)  # Pulls the data as a df, may need to manipulate the data types, but can worry about that later
 ```
 
+## Reading in ONA Data
+
+```{r}
+privateData <- ona::onaDownload(formName = "Private_Data_For_Testing", 
+                                account = "ona_r", 
+                                uname = "ona_r", 
+                                pass = "ona_r")  # Only need for private forms
+
+# Creates privateData which is a S3 object with 5 sockets (most importantly data and form)
+
+tt <- matrix(unlist(privateData@.Data),  # The data socket is a list
+             nrow = 16,  # The number of fields in the form (also the number of lists in @.Data socket)
+             byrow = T)
+
+forms <- privateData@form %>% as_tibble()  # Already a data object
+
+# Use the forms to create a lookup since the choice number will be what appears in the data
+
+```
 
 
 
