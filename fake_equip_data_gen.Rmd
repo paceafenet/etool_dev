@@ -119,7 +119,7 @@ df <- tibble(serial_num = 1:10000) %>%
                        no = ifelse(test = facility == "Lab1",
                                    yes = 4.0510564,
                                    no = 6.5243793)),
-         last_altered = (mdy_hms("1/1/2016 00:00:01")))
+         last_altered = mdy_hms("1/1/2016 00:00:01"))
   
 
 # equip types - http://cies.edu.ni/cedoc/general/World%20Health%20Organization%20HIV-AI%20(D)2/pdfs/list-laboratory.pdf
