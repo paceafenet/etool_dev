@@ -167,6 +167,40 @@ forms <- privateData@form %>% as_tibble()  # Already a data object
 
 ```
 
+## Using purrr instead of rowwise()
+
+```{r}
+library(purrr)
+
+tt <- zz %>% 
+  select(1, 4) %>% 
+  map_if(str_detect(string = str_sub(str = .$manufacture_date, start = 1, end = 2), 
+                    pattern = "20"), 
+         ymd) %>%
+  # map_at("manufacture_date", mdy) %>% ## By column name
+  # map_at(2, mdy) %>%   # By position
+  as_tibble()
+
+curr_date <- mdy("5/1/2016")
+
+googlesheets::gs_auth(token = "shiny_app_token.rds")
+my_sheets <- googlesheets::gs_ls()
+
+sheet_key <- my_sheets$sheet_key[1]
+ss <- googlesheets::gs_key(my_sheets$sheet_key[1])
+
+zz <- googlesheets::gs_read_csv(ss)
+
+# Sad face
+
+tt1 <- zz %>% 
+  select(1, 4) %>% 
+  map_at(2, if_else(condition = str_detect(string = str_sub(str = .$manufacture_date, start = 1, end = 2), pattern = "20"),
+                    true = ymd,
+                    false = mdy) %>% 
+  as_tibble()
+
+```
 
 
 

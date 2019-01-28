@@ -26,6 +26,7 @@ library(rmarkdown)
 library(leaflet)
 library(tidyr)
 library(ggplot2)
+library(stringr)
 
 curr_date <- mdy("5/1/2016")
 
@@ -35,30 +36,48 @@ my_sheets <- googlesheets::gs_ls()
 sheet_key <- my_sheets$sheet_key[1]
 ss <- googlesheets::gs_key(my_sheets$sheet_key[1])
 
-# Add a way to get the most recent row of data for each piece of equipment
+# zz <- googlesheets::gs_read_csv(ss)
+start_data <- googlesheets::gs_read_csv(ss) %>% 
+  arrange(serial_num, desc(last_altered)) %>%
+  distinct(serial_num, .keep_all = T)
 
-ss_data <- googlesheets::gs_read_csv(ss) %>% 
-  arrange(serial_num, desc(last_altered)) %>% 
-  distinct(serial_num, .keep_all = T) %>% 
+
+start_1 <- start_data %>% 
+  filter(str_detect(string = str_sub(str = manufacture_date, start = 1, end = 2), pattern = "20")) %>% 
+  mutate(manufacture_date = ymd(manufacture_date),
+         date_not_viable = ymd(date_not_viable),
+         most_recent_calibration = ymd(most_recent_calibration),
+         next_calibration = ymd(next_calibration),
+         most_recent_maintenance = ymd(most_recent_maintenance),
+         next_maintenance = ymd(next_maintenance),
+         retirement_date = ymd(retirement_date),
+         retirement_dt_requested = ymd_hms(retirement_dt_requested))
+
+start_2 <- start_data %>% 
+  filter(str_detect(string = str_sub(str = manufacture_date, start = 1, end = 2), pattern = "[^20]")) %>% 
   mutate(manufacture_date = mdy(manufacture_date),
-         date_active = mdy(date_active),
          date_not_viable = mdy(date_not_viable),
          most_recent_calibration = mdy(most_recent_calibration),
          next_calibration = mdy(next_calibration),
          most_recent_maintenance = mdy(most_recent_maintenance),
          next_maintenance = mdy(next_maintenance),
          retirement_date = mdy(retirement_date),
-         requires_attn = if_else(condition = (date_not_viable < curr_date |
+         retirement_dt_requested = ymd_hms(retirement_dt_requested))
+
+ss_data <- bind_rows(start_1, start_2) %>% 
+  mutate(requires_attn = if_else(condition = (date_not_viable < curr_date |
                                    next_calibration < curr_date |
                                    next_maintenance < curr_date) &
-                                   retirement_requested != 1,
+                                   is.na(retirement_requested),
                                  true = "red",
                                  false = if_else(condition = (date_not_viable - curr_date < 10 |
                                                    next_calibration - curr_date < 10 |
                                                    next_maintenance - curr_date < 10) &
-                                                   retirement_requested != 1,
+                                                   is.na(retirement_requested),
                                                  true = "yellow",
-                                                 false = "blue")),
+                                                 false = if_else(condition = !is.na(retirement_requested),
+                                                                 true = "blue",
+                                                                 false = "blue"))),
          requires_attn_label = if_else(condition = date_not_viable < curr_date |
                                    next_calibration < curr_date |
                                    next_maintenance < curr_date,
@@ -83,6 +102,8 @@ ss_data <- googlesheets::gs_read_csv(ss) %>%
                                false = if_else(condition = next_maintenance - curr_date < 10,
                                                true = 2,
                                                false = 1)))
+
+# xx <- ss_data %>% filter(serial_num == 1277)
 ```
 
 Inputs {.sidebar data-width=350}
@@ -131,63 +152,122 @@ actionBttn(inputId = "retirement_button",
            label = "Submit Retirement Request",
            style = "pill")
 
-## Reactive events
+values <- reactiveValues()
 
-equip_select <- eventReactive(input$alter_dt_button,
-                              {input$equip_select})
+observe({
+  input$alter_dt_button
+  
+  values$equip_id <- input$equip_select
+})
 
-column_edit <- eventReactive(input$alter_dt_button,
-                             {input$column_edit})
+observe({
+  input$alter_dt_button
+  
+  values$dt_col <- input$column_edit
+})
 
-dt_alteration <- eventReactive(input$alter_dt_button,
-                               {input$dt_alteration})
+observe({
+  input$alter_dt_button
+  
+  values$new_dt <- input$dt_alteration
+})
 
-equip_data <- eventReactive(input$alter_dt_button,
-                            {
-                              equip_data <- ss_data %>% 
-                                # filter(serial_num == 1)
-                                filter(serial_num == equip_select())
-                
-                              # equip_data[["most_recent_maintenance"]] <- "2019-01-01"
-                              equip_data[[column_edit()]] <- as.character(dt_alteration())
-                              equip_data$last_altered <- as.character(ymd_hms(Sys.time()))
-                              
-                              if(column_edit() == "most_recent_calibration"){
-                                equip_data$most_recent_calibration <- equip_data$most_recent_calibration + 90
-                              }
-                              
-                              if(column_edit() == "most_recent_maintenance"){
-                                equip_data$most_recent_maintenance <- equip_data$most_recent_maintenance + 180
-                              }
-                              
-              })
+observe({
+  input$retirement_button
+  
+  values$retirement_flag <- 1
+  
+})
 
-observeEvent(input$alter_dt_button,
+retire_update <- eventReactive(input$retirement_button,
+                               {
+                                 tt <- ss_data %>% 
+                                   filter(serial_num == values$equip_id) %>% 
+                                   mutate(retirement_requested = 1,
+                                          last_altered = ymd_hms(Sys.time()),
+                                          retirement_dt_requested = ymd_hms(Sys.time())) 
+                               })
+
+observeEvent(input$retirement_button,
              {
-               googlesheets::gs_add_row(ss = googlesheets::gs_key(my_sheets$sheet_key[1]),
-                                        input = equip_data())
+               googlesheets::gs_auth(token = "shiny_app_token.rds")
+               my_sheets <- googlesheets::gs_ls()
+
+               sheet_key <- my_sheets$sheet_key[1]
+               ss <- googlesheets::gs_key(my_sheets$sheet_key[1])
+
+               googlesheets::gs_add_row(ss = ss,
+                                        input = retire_update())
              })
 
-# MOVE OUT OF THIS REACTIVE EXPRESSION  equip_data
-                              
-
-equip_data <- eventReactive(input$retirement_button,
-                            {
-                              equip_data <- ss_data %>%
-                                # filter(serial_num == 1)
-                                filter(serial_num == equip_select())
-
-                              equip_data$retirement_requested <- 1
-                              equip_data$retirement_dt_requested <- as.character(ymd_hms(Sys.time()))
-                              
-              })
-
-# Print out the inputs for reach reactive as well as a table of the data I'm trying to upload, the reason it isn't updating likely has to do with my observe event
+dt_update <- eventReactive(input$alter_dt_button,
+                           {
+                             tt <- ss_data %>%
+                               filter(serial_num == values$equip_id) %>%
+                               mutate(
+                                 most_recent_maintenance = if_else(
+                                   condition = values$dt_col == "most_recent_maintenance",
+                                     true = values$new_dt,
+                                     false = most_recent_maintenance
+                                 ),
+                                 most_recent_calibration = if_else(
+                                   condition = values$dt_col == "most_recent_calibration",
+                                   true = values$new_dt,
+                                   false = most_recent_maintenance
+                                 )
+                               ) %>%
+                               mutate(
+                                 next_maintenance = if_else(
+                                   condition = values$dt_col == "most_recent_maintenance",
+                                   true = most_recent_maintenance + 90,
+                                   false = next_maintenance
+                                 ),
+                                 next_calibration = if_else(
+                                   condition = values$dt_col == "most_recent_calibration",
+                                   true = most_recent_calibration + 180,
+                                   false = next_calibration
+                                 ),
+                                 last_altered = ymd_hms(Sys.time())#,
+                                 
+                                 # most_recent_maintenance = paste(
+                                 #   month(most_recent_maintenance),
+                                 #   day(most_recent_maintenance),
+                                 #   year(most_recent_maintenance),
+                                 #   sep = "/"
+                                 # ),
+                                 # most_recent_calibration = paste(
+                                 #   month(most_recent_calibration),
+                                 #   day(most_recent_calibration),
+                                 #   year(most_recent_calibration),
+                                 #   sep = "/"
+                                 # ),
+                                 # next_maintenance = paste(
+                                 #   month(next_maintenance),
+                                 #   day(next_maintenance),
+                                 #   year(next_maintenance),
+                                 #   sep = "/"
+                                 # ),
+                                 # next_calibration = paste(
+                                 #   month(next_calibration),
+                                 #   day(next_calibration),
+                                 #   year(next_calibration),
+                                 #   sep = "/"
+                                 # )#,
+                                 # last_altered = paste(month(last_altered), day(last_altered), year(last_altered), sep = "/")
+                               )
+                             
+                           })
 
 observeEvent(input$alter_dt_button,
              {
-               googlesheets::gs_add_row(ss = googlesheets::gs_key(my_sheets$sheet_key[1]),
-                                        input = equip_data())
+               googlesheets::gs_auth(token = "shiny_app_token.rds")
+               my_sheets <- googlesheets::gs_ls()
+
+               sheet_key <- my_sheets$sheet_key[1]
+               ss <- googlesheets::gs_key(my_sheets$sheet_key[1])
+
+               googlesheets::gs_add_row(ss = ss,
+                                        input = dt_update())
              })
 
 ```
@@ -196,6 +276,16 @@ Row 1 {.tabset .tabset-fade data-height=800}
 -----------------------------------------------------------------------
 
 ### Situation Map {.no-mobile}
+
+```{r eval=FALSE}
+# renderPrint(
+# renderText(
+  # ymd(values$new_dt)
+DT::renderDataTable(
+  dt_update()
+)
+```
+
 
 ```{r}
 
