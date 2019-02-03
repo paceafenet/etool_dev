@@ -103,7 +103,7 @@ ss_data <- bind_rows(start_1, start_2) %>%
                                                true = 2,
                                                false = 1)))
 
-# xx <- ss_data %>% filter(serial_num == 1277)
+# xx <- ss_data %>% filter(serial_num == 620)
 ```
 
 Inputs {.sidebar data-width=350}
@@ -141,6 +141,8 @@ dateInput(inputId = "dt_alteration",
           value = Sys.Date(),
           min = "2019-01-01")
 
+useSweetAlert()
+
 actionBttn(inputId = "alter_dt_button",
            label = "Alter Date",
            style = "pill")
@@ -172,7 +174,61 @@ observe({
   values$new_dt <- input$dt_alteration
 })
 
+
+dt_update <- eventReactive(input$alter_dt_button,
+                           {
+                             tt <- ss_data %>%
+                               filter(serial_num == values$equip_id) %>%
+                               mutate(most_recent_maintenance = if_else(
+                                 condition = values$dt_col == "most_recent_maintenance",
+                                 true = values$new_dt,
+                                 false = most_recent_maintenance
+                                 ),
+                                 most_recent_calibration = if_else(
+                                   condition = values$dt_col == "most_recent_calibration",
+                                   true = values$new_dt,
+                                   false = most_recent_maintenance
+                                 )
+                               ) %>%
+                               mutate(
+                                 next_maintenance = if_else(
+                                   condition = values$dt_col == "most_recent_maintenance",
+                                   true = most_recent_maintenance + 90,
+                                   false = next_maintenance
+                                 ),
+                                 next_calibration = if_else(
+                                   condition = values$dt_col == "most_recent_calibration",
+                                   true = most_recent_calibration + 180,
+                                   false = next_calibration
+                                 ),
+                                 last_altered = ymd_hms(Sys.time())#,
+                                 
+                               )
+                             
+                           })
+
+observeEvent(input$alter_dt_button,
+             {
+               googlesheets::gs_auth(token = "shiny_app_token.rds")
+               my_sheets <- googlesheets::gs_ls()
+
+               sheet_key <- my_sheets$sheet_key[1]
+               ss <- googlesheets::gs_key(my_sheets$sheet_key[1])
+
+               googlesheets::gs_add_row(ss = ss,
+                                        input = dt_update())
+             })
+
+observeEvent(input$alter_dt_button, {
+  sendSweetAlert(session = session,
+                 title = "FYI:",
+                 text = "You have successfully updated the equipment info. This change will be reflected once you close the eTool and open it again.",
+                 type = "info"
+  )
+})
+
 observe({
+  
   input$retirement_button
   
   values$retirement_flag <- 1
@@ -200,75 +256,12 @@ observeEvent(input$retirement_button,
                                         input = retire_update())
              })
 
-dt_update <- eventReactive(input$alter_dt_button,
-                           {
-                             tt <- ss_data %>%
-                               filter(serial_num == values$equip_id) %>%
-                               mutate(
-                                 most_recent_maintenance = if_else(
-                                   condition = values$dt_col == "most_recent_maintenance",
-                                     true = values$new_dt,
-                                     false = most_recent_maintenance
-                                 ),
-                                 most_recent_calibration = if_else(
-                                   condition = values$dt_col == "most_recent_calibration",
-                                   true = values$new_dt,
-                                   false = most_recent_maintenance
-                                 )
-                               ) %>%
-                               mutate(
-                                 next_maintenance = if_else(
-                                   condition = values$dt_col == "most_recent_maintenance",
-                                   true = most_recent_maintenance + 90,
-                                   false = next_maintenance
-                                 ),
-                                 next_calibration = if_else(
-                                   condition = values$dt_col == "most_recent_calibration",
-                                   true = most_recent_calibration + 180,
-                                   false = next_calibration
-                                 ),
-                                 last_altered = ymd_hms(Sys.time())#,
-                                 
-                                 # most_recent_maintenance = paste(
-                                 #   month(most_recent_maintenance),
-                                 #   day(most_recent_maintenance),
-                                 #   year(most_recent_maintenance),
-                                 #   sep = "/"
-                                 # ),
-                                 # most_recent_calibration = paste(
-                                 #   month(most_recent_calibration),
-                                 #   day(most_recent_calibration),
-                                 #   year(most_recent_calibration),
-                                 #   sep = "/"
-                                 # ),
-                                 # next_maintenance = paste(
-                                 #   month(next_maintenance),
-                                 #   day(next_maintenance),
-                                 #   year(next_maintenance),
-                                 #   sep = "/"
-                                 # ),
-                                 # next_calibration = paste(
-                                 #   month(next_calibration),
-                                 #   day(next_calibration),
-                                 #   year(next_calibration),
-                                 #   sep = "/"
-                                 # )#,
-                                 # last_altered = paste(month(last_altered), day(last_altered), year(last_altered), sep = "/")
-                               )
-                             
-                           })
-
-observeEvent(input$alter_dt_button,
-             {
-               googlesheets::gs_auth(token = "shiny_app_token.rds")
-               my_sheets <- googlesheets::gs_ls()
-
-               sheet_key <- my_sheets$sheet_key[1]
-               ss <- googlesheets::gs_key(my_sheets$sheet_key[1])
-
-               googlesheets::gs_add_row(ss = ss,
-                                        input = dt_update())
-             })
+observeEvent(input$retirement_button, {
+  sendSweetAlert(session = session,
+                 title = "FYI:",
+                 type = "info",
+                 title = "Confirm that you would like to retire this equipment:")
+})
 
 ```
 
@@ -337,6 +330,8 @@ renderDataTable({
               fillContainer = T,
               filter = "none",
               selection = "single",
+              # selection = list("single",
+              #                  target = "cell"),
               options = list(
     columnDefs = list(list(targets = c(8:10), visible = FALSE))
     )) %>% 

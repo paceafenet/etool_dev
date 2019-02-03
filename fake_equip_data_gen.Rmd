@@ -125,7 +125,7 @@ df <- tibble(serial_num = 1:10000) %>%
 # equip types - http://cies.edu.ni/cedoc/general/World%20Health%20Organization%20HIV-AI%20(D)2/pdfs/list-laboratory.pdf
 
 
-# •	Equipment location – GPS coordinates
+# Equipment location GPS coordinates
 
 ```
 
