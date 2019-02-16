@@ -10,7 +10,7 @@ output:
     toc: true
     toc_depth: 2
     preserve_yaml: true
-# always_allow_html: yes
+always_allow_html: no
 
 # Export as pdf as well
 
@@ -189,7 +189,7 @@ used to develop the current version of the eTool.
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
 }
 
-#cgarxzrahw .gt_table {
+#hswndleimv .gt_table {
   display: table;
   border-collapse: collapse;
   margin-left: auto;
@@ -208,13 +208,13 @@ used to develop the current version of the eTool.
   /* table.border.top.color */
 }
 
-#cgarxzrahw .gt_heading {
+#hswndleimv .gt_heading {
   background-color: #FFFFFF;
   /* heading.background.color */
   border-bottom-color: #FFFFFF;
 }
 
-#cgarxzrahw .gt_title {
+#hswndleimv .gt_title {
   color: #000000;
   font-size: 125%;
   /* heading.title.font.size */
@@ -225,7 +225,7 @@ used to develop the current version of the eTool.
   border-bottom-width: 0;
 }
 
-#cgarxzrahw .gt_subtitle {
+#hswndleimv .gt_subtitle {
   color: #000000;
   font-size: 85%;
   /* heading.subtitle.font.size */
@@ -236,7 +236,7 @@ used to develop the current version of the eTool.
   border-top-width: 0;
 }
 
-#cgarxzrahw .gt_bottom_border {
+#hswndleimv .gt_bottom_border {
   border-bottom-style: solid;
   /* heading.border.bottom.style */
   border-bottom-width: 2px;
@@ -245,7 +245,7 @@ used to develop the current version of the eTool.
   /* heading.border.bottom.color */
 }
 
-#cgarxzrahw .gt_column_spanner {
+#hswndleimv .gt_column_spanner {
   border-bottom-style: solid;
   border-bottom-width: 2px;
   border-bottom-color: #A8A8A8;
@@ -253,7 +253,7 @@ used to develop the current version of the eTool.
   padding-bottom: 4px;
 }
 
-#cgarxzrahw .gt_col_heading {
+#hswndleimv .gt_col_heading {
   color: #000000;
   background-color: #FFFFFF;
   /* column_labels.background.color */
@@ -266,11 +266,11 @@ used to develop the current version of the eTool.
   margin: 10px;
 }
 
-#cgarxzrahw .gt_sep_right {
+#hswndleimv .gt_sep_right {
   border-right: 5px solid #FFFFFF;
 }
 
-#cgarxzrahw .gt_group_heading {
+#hswndleimv .gt_group_heading {
   padding: 8px;
   color: #000000;
   background-color: #FFFFFF;
@@ -294,7 +294,7 @@ used to develop the current version of the eTool.
   vertical-align: middle;
 }
 
-#cgarxzrahw .gt_empty_group_heading {
+#hswndleimv .gt_empty_group_heading {
   padding: 0.5px;
   color: #000000;
   background-color: #FFFFFF;
@@ -318,29 +318,29 @@ used to develop the current version of the eTool.
   vertical-align: middle;
 }
 
-#cgarxzrahw .gt_striped {
+#hswndleimv .gt_striped {
   background-color: #f2f2f2;
 }
 
-#cgarxzrahw .gt_row {
+#hswndleimv .gt_row {
   padding: 10px;
   /* row.padding */
   margin: 10px;
   vertical-align: middle;
 }
 
-#cgarxzrahw .gt_stub {
+#hswndleimv .gt_stub {
   border-right-style: solid;
   border-right-width: 2px;
   border-right-color: #A8A8A8;
   padding-left: 12px;
 }
 
-#cgarxzrahw .gt_stub.gt_row {
+#hswndleimv .gt_stub.gt_row {
   background-color: #FFFFFF;
 }
 
-#cgarxzrahw .gt_summary_row {
+#hswndleimv .gt_summary_row {
   background-color: #FFFFFF;
   /* summary_row.background.color */
   padding: 6px;
@@ -349,13 +349,13 @@ used to develop the current version of the eTool.
   /* summary_row.text_transform */
 }
 
-#cgarxzrahw .gt_first_summary_row {
+#hswndleimv .gt_first_summary_row {
   border-top-style: solid;
   border-top-width: 2px;
   border-top-color: #A8A8A8;
 }
 
-#cgarxzrahw .gt_table_body {
+#hswndleimv .gt_table_body {
   border-top-style: solid;
   /* field.border.top.style */
   border-top-width: 2px;
@@ -370,50 +370,50 @@ used to develop the current version of the eTool.
   /* field.border.bottom.color */
 }
 
-#cgarxzrahw .gt_footnote {
+#hswndleimv .gt_footnote {
   font-size: 90%;
   /* footnote.font.size */
   padding: 4px;
   /* footnote.padding */
 }
 
-#cgarxzrahw .gt_sourcenote {
+#hswndleimv .gt_sourcenote {
   font-size: 90%;
   /* sourcenote.font.size */
   padding: 4px;
   /* sourcenote.padding */
 }
 
-#cgarxzrahw .gt_center {
+#hswndleimv .gt_center {
   text-align: center;
 }
 
-#cgarxzrahw .gt_left {
+#hswndleimv .gt_left {
   text-align: left;
 }
 
-#cgarxzrahw .gt_right {
+#hswndleimv .gt_right {
   text-align: right;
   font-variant-numeric: tabular-nums;
 }
 
-#cgarxzrahw .gt_font_normal {
+#hswndleimv .gt_font_normal {
   font-weight: normal;
 }
 
-#cgarxzrahw .gt_font_bold {
+#hswndleimv .gt_font_bold {
   font-weight: bold;
 }
 
-#cgarxzrahw .gt_font_italic {
+#hswndleimv .gt_font_italic {
   font-style: italic;
 }
 
-#cgarxzrahw .gt_super {
+#hswndleimv .gt_super {
   font-size: 65%;
 }
 
-#cgarxzrahw .gt_footnote_glyph {
+#hswndleimv .gt_footnote_glyph {
   font-style: italic;
   font-size: 65%;
 }
