@@ -5,19 +5,20 @@ description: |
 author:
   - name: Travis Sondgerath
 date: '`r Sys.Date()`'
-# output:
-#   md_document:
-#     toc: true
-#     toc_depth: 2
-#     preserve_yaml: true
+output:
+  md_document:
+    toc: true
+    toc_depth: 2
+    preserve_yaml: true
+always_allow_html: yes
 
 # Export as pdf as well
 
-output:
-  pagedown::html_paged:
-    toc: true
-    self_contained: true
-toc-title: Contents
+# output:
+#   pagedown::html_paged:
+#     toc: true
+#     self_contained: true
+# toc-title: Contents
 ---
 
 ```{r include=F}
