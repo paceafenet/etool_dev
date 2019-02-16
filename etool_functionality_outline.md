@@ -10,7 +10,7 @@ output:
     toc: true
     toc_depth: 2
     preserve_yaml: true
-always_allow_html: yes
+# always_allow_html: yes
 
 # Export as pdf as well
 
@@ -184,6 +184,379 @@ The table below shows the equipment features desired by the Equipment
 Maintenance Team. These features are contained in the demonstration data
 used to develop the current version of the eTool.
 
+<!--html_preserve-->
+<style>html {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', 'Fira Sans', 'Droid Sans', Arial, sans-serif;
+}
+
+#cgarxzrahw .gt_table {
+  display: table;
+  border-collapse: collapse;
+  margin-left: auto;
+  margin-right: auto;
+  color: #000000;
+  font-size: 16px;
+  background-color: #FFFFFF;
+  /* table.background.color */
+  width: auto;
+  /* table.width */
+  border-top-style: solid;
+  /* table.border.top.style */
+  border-top-width: 2px;
+  /* table.border.top.width */
+  border-top-color: #A8A8A8;
+  /* table.border.top.color */
+}
+
+#cgarxzrahw .gt_heading {
+  background-color: #FFFFFF;
+  /* heading.background.color */
+  border-bottom-color: #FFFFFF;
+}
+
+#cgarxzrahw .gt_title {
+  color: #000000;
+  font-size: 125%;
+  /* heading.title.font.size */
+  padding-top: 4px;
+  /* heading.top.padding */
+  padding-bottom: 1px;
+  border-bottom-color: #FFFFFF;
+  border-bottom-width: 0;
+}
+
+#cgarxzrahw .gt_subtitle {
+  color: #000000;
+  font-size: 85%;
+  /* heading.subtitle.font.size */
+  padding-top: 1px;
+  padding-bottom: 4px;
+  /* heading.bottom.padding */
+  border-top-color: #FFFFFF;
+  border-top-width: 0;
+}
+
+#cgarxzrahw .gt_bottom_border {
+  border-bottom-style: solid;
+  /* heading.border.bottom.style */
+  border-bottom-width: 2px;
+  /* heading.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* heading.border.bottom.color */
+}
+
+#cgarxzrahw .gt_column_spanner {
+  border-bottom-style: solid;
+  border-bottom-width: 2px;
+  border-bottom-color: #A8A8A8;
+  padding-top: 4px;
+  padding-bottom: 4px;
+}
+
+#cgarxzrahw .gt_col_heading {
+  color: #000000;
+  background-color: #FFFFFF;
+  /* column_labels.background.color */
+  font-size: 16px;
+  /* column_labels.font.size */
+  font-weight: initial;
+  /* column_labels.font.weight */
+  vertical-align: middle;
+  padding: 10px;
+  margin: 10px;
+}
+
+#cgarxzrahw .gt_sep_right {
+  border-right: 5px solid #FFFFFF;
+}
+
+#cgarxzrahw .gt_group_heading {
+  padding: 8px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom.style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom.color */
+  vertical-align: middle;
+}
+
+#cgarxzrahw .gt_empty_group_heading {
+  padding: 0.5px;
+  color: #000000;
+  background-color: #FFFFFF;
+  /* stub_group.background.color */
+  font-size: 16px;
+  /* stub_group.font.size */
+  font-weight: initial;
+  /* stub_group.font.weight */
+  border-top-style: solid;
+  /* stub_group.border.top.style */
+  border-top-width: 2px;
+  /* stub_group.border.top.width */
+  border-top-color: #A8A8A8;
+  /* stub_group.border.top.color */
+  border-bottom-style: solid;
+  /* stub_group.border.bottom.style */
+  border-bottom-width: 2px;
+  /* stub_group.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* stub_group.border.bottom.color */
+  vertical-align: middle;
+}
+
+#cgarxzrahw .gt_striped {
+  background-color: #f2f2f2;
+}
+
+#cgarxzrahw .gt_row {
+  padding: 10px;
+  /* row.padding */
+  margin: 10px;
+  vertical-align: middle;
+}
+
+#cgarxzrahw .gt_stub {
+  border-right-style: solid;
+  border-right-width: 2px;
+  border-right-color: #A8A8A8;
+  padding-left: 12px;
+}
+
+#cgarxzrahw .gt_stub.gt_row {
+  background-color: #FFFFFF;
+}
+
+#cgarxzrahw .gt_summary_row {
+  background-color: #FFFFFF;
+  /* summary_row.background.color */
+  padding: 6px;
+  /* summary_row.padding */
+  text-transform: inherit;
+  /* summary_row.text_transform */
+}
+
+#cgarxzrahw .gt_first_summary_row {
+  border-top-style: solid;
+  border-top-width: 2px;
+  border-top-color: #A8A8A8;
+}
+
+#cgarxzrahw .gt_table_body {
+  border-top-style: solid;
+  /* field.border.top.style */
+  border-top-width: 2px;
+  /* field.border.top.width */
+  border-top-color: #A8A8A8;
+  /* field.border.top.color */
+  border-bottom-style: solid;
+  /* field.border.bottom.style */
+  border-bottom-width: 2px;
+  /* field.border.bottom.width */
+  border-bottom-color: #A8A8A8;
+  /* field.border.bottom.color */
+}
+
+#cgarxzrahw .gt_footnote {
+  font-size: 90%;
+  /* footnote.font.size */
+  padding: 4px;
+  /* footnote.padding */
+}
+
+#cgarxzrahw .gt_sourcenote {
+  font-size: 90%;
+  /* sourcenote.font.size */
+  padding: 4px;
+  /* sourcenote.padding */
+}
+
+#cgarxzrahw .gt_center {
+  text-align: center;
+}
+
+#cgarxzrahw .gt_left {
+  text-align: left;
+}
+
+#cgarxzrahw .gt_right {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+#cgarxzrahw .gt_font_normal {
+  font-weight: normal;
+}
+
+#cgarxzrahw .gt_font_bold {
+  font-weight: bold;
+}
+
+#cgarxzrahw .gt_font_italic {
+  font-style: italic;
+}
+
+#cgarxzrahw .gt_super {
+  font-size: 65%;
+}
+
+#cgarxzrahw .gt_footnote_glyph {
+  font-style: italic;
+  font-size: 65%;
+}
+</style>
+<!--gt table start-->
+<table class="gt_table">
+<thead>
+<tr>
+<th colspan="1" class="gt_heading gt_title gt_font_normal gt_center">
+Table 1
+</th>
+</tr>
+<tr>
+<th colspan="1" class="gt_heading gt_subtitle gt_font_normal gt_center gt_bottom_border">
+</th>
+</tr>
+</thead>
+<tr>
+<th class="gt_col_heading gt_left" rowspan="1" colspan="1">
+Column Names: Fake Data
+</th>
+</tr>
+<tbody class="gt_table_body">
+<tr>
+<td class="gt_row gt_left">
+serial\_num
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left gt_striped">
+equip\_type
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left">
+manufacturer
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left gt_striped">
+manufacture\_date
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left">
+date\_active
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left gt_striped">
+date\_not\_viable
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left">
+facility
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left gt_striped">
+ownership\_type
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left">
+lab\_level
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left gt_striped">
+calib\_engineer\_nm
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left">
+calib\_engineer\_post
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left gt_striped">
+most\_recent\_calibration
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left">
+next\_calibration
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left gt_striped">
+most\_recent\_maintenance
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left">
+next\_maintenance
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left gt_striped">
+maintenance\_engineer\_nm
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left">
+maintenance\_engineer\_post
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left gt_striped">
+retirement\_date
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left">
+retirement\_requested
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left gt_striped">
+retirement\_dt\_requested
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left">
+long
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left gt_striped">
+lat
+</td>
+</tr>
+<tr>
+<td class="gt_row gt_left">
+last\_altered
+</td>
+</tr>
+</tbody>
+</table>
+<!--gt table end-->
+
+<!--/html_preserve-->
 Conclusions
 ===========
 
