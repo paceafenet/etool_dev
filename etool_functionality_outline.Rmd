@@ -108,7 +108,7 @@ In addition to maintenance dates, the underlying data describes each piece of eq
 
 The table below shows the equipment features desired by the Equipment Maintenance Team. These features are contained in the demonstration data used to develop the current version of the eTool. 
 
-```{r}
+```{r include=FALSE}
 tt <- read_csv(file = "data\\fake_equip_data.csv") %>% 
   colnames() %>% 
   as_tibble() %>% 

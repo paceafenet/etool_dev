@@ -4,7 +4,7 @@ description: |
  This report contains a description of the existing data from Cameroon and Nigeria
 author:
   - name: Travis Sondgerath
-date: '2018-12-27'
+date: '2019-02-16'
 output:
   md_document:
     toc: true
