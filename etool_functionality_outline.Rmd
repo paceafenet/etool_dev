@@ -72,14 +72,11 @@ At the bottom of the eTool there are three tabs; 'By Attention Category,' 'By Fa
 On the left side of the tool there is also one text box, one drop down selector, one date input, and two buttons. Based on the results shown in the map and table, the user could decide to take action and update the status of equipment described. The eTool was designed to address two scenarios;
 
 1. Calibration dates do not reflect present status
-
   * Refer to 'Edit Table,' find the equipment ID for the equipment that needs to be edited
   * Select either 'Most Recent Calibration' or 'Most Recent Maintenance' from the 'Select a Date' dropdown
   * Select a date in 'Select a new date'
   * Click the 'Alter Date' button. A message will appear notifying you a change has been made to the data. If you have clicked this button in error or need to enter a different date, change your selections and click the button again.
-
 2. Equipment has been taken out of service
-
   * The tool may reflect that equipment requires maintenance, however, it may be that the equipment has already been or will soon be retired.
   * Refer to 'Edit Table,' find the equipment ID for the equipment that needs to be edited, enter the ID in the text box
   * Click the 'Submit Retirement Request' button
