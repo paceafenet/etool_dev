@@ -36,11 +36,9 @@ my_sheets <- googlesheets::gs_ls()
 sheet_key <- my_sheets$sheet_key[1]
 ss <- googlesheets::gs_key(my_sheets$sheet_key[1])
 
-# zz <- googlesheets::gs_read_csv(ss)
 start_data <- googlesheets::gs_read_csv(ss) %>% 
   arrange(serial_num, desc(last_altered)) %>%
   distinct(serial_num, .keep_all = T)
-
 
 start_1 <- start_data %>% 
   filter(str_detect(string = str_sub(str = manufacture_date, start = 1, end = 2), pattern = "20")) %>% 
@@ -102,8 +100,6 @@ ss_data <- bind_rows(start_1, start_2) %>%
                                false = if_else(condition = next_maintenance - curr_date < 10,
                                                true = 2,
                                                false = 1)))
-
-# xx <- ss_data %>% filter(serial_num == 620)
 ```
 
 Inputs {.sidebar data-width=350}
@@ -201,7 +197,7 @@ dt_update <- eventReactive(input$alter_dt_button,
                                    true = most_recent_calibration + 180,
                                    false = next_calibration
                                  ),
-                                 last_altered = ymd_hms(Sys.time())#,
+                                 last_altered = ymd_hms(Sys.time())
                                  
                                )
                              
@@ -270,16 +266,6 @@ Row 1 {.tabset .tabset-fade data-height=800}
 
 ### Situation Map {.no-mobile}
 
-```{r eval=FALSE}
-# renderPrint(
-# renderText(
-  # ymd(values$new_dt)
-DT::renderDataTable(
-  dt_update()
-)
-```
-
-
 ```{r}
 
 renderLeaflet({
@@ -302,7 +288,6 @@ plot1 <- ss_data %>%
          lat = jitter(lat, factor = 1),
          long = jitter(long, factor = 1)) %>%
   filter(requires_attn_label %in% c(input$attn_level)) %>%
-  # filter(requires_attn == "red") %>%
   leaflet() %>%
   addTiles() %>%
   addCircleMarkers(lng = ~long,
@@ -320,9 +305,7 @@ plot1
 
 ```{r}
 renderDataTable({
-  # tt <- 
   ss_data %>% 
-    # filter(requires_attn_label == "Immediately") %>%
     filter(requires_attn_label %in% c(input$attn_level)) %>%
     filter(facility %in% c(input$lab_select)) %>%
     select(7, 1:2, 6, 12:15, 26:28) %>% 
@@ -330,11 +313,7 @@ renderDataTable({
               fillContainer = T,
               filter = "none",
               selection = "single",
-              # selection = list("single",
-              #                  target = "cell"),
-              options = list(
-    columnDefs = list(list(targets = c(8:10), visible = FALSE))
-    )) %>% 
+              options = list(columnDefs = list(list(targets = c(8:10), visible = FALSE)))) %>% 
     formatStyle(columns = "date_not_viable",
                 valueColumns = "viable_attn",
                 backgroundColor = styleEqual(c(3, 2, 1), c("red", "yellow", "white")),
@@ -346,14 +325,9 @@ renderDataTable({
     formatStyle(columns = "next_maintenance",
                 valueColumns = "maintenance_attn",
                 backgroundColor = styleEqual(c(3, 2, 1), c("red", "yellow", "white")))
-  
-  # NEED TO CREATE ANOTHER VARIABLE FOR EACH DATE IN THE SETUP THAT WILL GIVE THE BACKGROUND COLOR FOR EACH DATE (WHERE APPLICABLE) - HIDE THESE DUMMY COLUMNS USING THE COLUMNDEFS FUNCTION IN THE OPTIONS STATEMENT (SEE DT DOCS ABOUT BACKGROUND COLORS)
-    # formatStyle("date_not_viable",
-    #             backgroundColor = styleInterval(c(date)))
-  
+ 
 })
 ```
-
 
 Row 2 {.tabset .tabset-fade}
 -----------------------------------------------------------------------
@@ -377,8 +351,6 @@ plot2 <- tt %>%
         axis.text.x = element_text(face = "bold"),
         axis.text.y = element_text(face = "bold"))
 
-# tt
-
 p1 <- plotly::ggplotly(plot2)
 
 p1
@@ -400,7 +372,6 @@ tt2 <- ss_data %>%
 plot3 <- tt2 %>% 
   ggplot(aes(x = facility, weight = n)) +
   geom_bar(fill = "white", color = "black") +
-  # scale_y_continuous(limits = c(0, 10000), breaks = seq(0, 5000, 500)) +
   theme_classic() +
   theme(legend.position = "none",
         axis.title = element_blank(),
@@ -410,8 +381,6 @@ plot3 <- tt2 %>%
 p2 <- plotly::ggplotly(plot3)
 
 p2
-
-# tt2
 
 kableExtra::kable_styling(knitr::kable(tt2))
 
@@ -430,7 +399,6 @@ tt3 <- ss_data %>%
 plot4 <- tt3 %>% 
   ggplot(aes(x = lab_level, weight = n)) +
   geom_bar(fill = "white", color = "black") +
-  # scale_y_continuous(limits = c(0, 10000), breaks = seq(0, 5000, 500)) +
   theme_classic() +
   scale_x_discrete(limits = c("district", "regional", "national", "other")) +
   ggtitle("Equipment Requiring Immediate Attention") +
@@ -438,8 +406,6 @@ plot4 <- tt3 %>%
         axis.title = element_blank(),
         axis.text.x = element_text(face = "bold"),
         axis.text.y = element_text(face = "bold"))
-
-# tt3
 
 p4 <- plotly::ggplotly(plot4)
 

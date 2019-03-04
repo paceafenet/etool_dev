@@ -8,5 +8,5 @@ Below are several-related links
 2. [Project Final Report](https://paceafenet.github.io/final_report/)
 3. [Report Describing Existing Data](https://github.com/paceafenet/etool_dev/blob/master/existing_lab_data_exploration.md)
 4. [Demo eTool](https://travis-shinin-spot.shinyapps.io/etool_dev/)
-5. [eTool Outline](https://github.com/paceafenet/etool_dev/blob/master/eTool%20Functionality%20Outline.pdf)
+5. [eTool Outline](https://github.com/paceafenet/etool_dev/blob/master/eTool%20Functionality%20Outline.pdf), click download to download a pdf copy
 
