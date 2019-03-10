@@ -1,0 +1,12 @@
+name: etool_dev_code
+title: etool_dev_code
+username: rstudio
+account: rstudio
+server: localhost
+hostUrl: http://localhost:5000/rsconnect/__api__
+appId: 8
+bundleId: 8
+url: http://localhost:5000/rsconnect/content/8/
+when: 1552242271.31531
+asMultiple: FALSE
+asStatic: FALSE

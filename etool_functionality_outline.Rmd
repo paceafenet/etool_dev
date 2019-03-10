@@ -9,6 +9,11 @@ output:
   pagedown::html_paged:
     toc: true
     self_contained: true
+# output:
+#   pagedown::html_paged:
+#     css: ["default-fonts", "default"]  # Removes paginations and filler pages
+#     # toc: true
+#     self_contained: true
 toc-title: Contents
 ---
 

@@ -45,9 +45,9 @@ The eTool GitHub repository is private. As such it can only be viewed by those w
 
 ![](screen grabs/clone github repo.jpg)
 
-Cloning a repository is essentially copying a group of files and and sub directories. Navigate to the cloned directory wherever you saved it. Inside this directory, double click the etool_dev.Rproj file if you have already installed R and RStudio. If you have not downloaded these tools, start **[here](https://support.rstudio.com/hc/en-us/articles/201141096-Getting-Started-with-R)**. There are links to downloading both R and RStudio as well as helpful resources for getting started in R programming. This report is *not* meant to be a complete guide to R programming. However, annotated R code is included along with instructions on running the code. 
+Cloning a repository is essentially like copying a group of files and and sub directories. Navigate to the cloned directory wherever you saved it. Inside this directory, double click the etool_dev.Rproj file if you have already installed R and RStudio. If you have not downloaded these tools, start **[here](https://support.rstudio.com/hc/en-us/articles/201141096-Getting-Started-with-R)**. There are links to downloading both R and RStudio as well as helpful resources for getting started in R programming. This report is *not* meant to be a complete guide to R programming. However, annotated R code is included along with instructions on running the code. 
 
-The eTool code was developed to use Google sheets as the back end data source for the eTool. Although other back ends such as SQL Server or even free options such as SQLite would have allowed the eTool to function more quickly, I chose Google sheets as setting up an account is free and Google sheets are laid out in a format familiar to non-technical users. Additionally, Google makes a rich API available for Google sheets that makes obtaining and manipulating data stored in Google sheets simple. Lastly, the R package **[googlesheets](https://github.com/jennybc/googlesheets)** makes taking advantage of this API in R possible.
+The eTool code was developed to use Google sheets as the back end data source for the application. Although other back ends such as SQL Server or even free options such as SQLite would have allowed the eTool to function more quickly, I chose Google sheets as setting up an account is free and Google sheets are laid out in a format familiar to non-technical users. Additionally, Google makes a rich API available for Google sheets that makes obtaining and manipulating data stored in Google sheets simple. Lastly, the R package **[googlesheets](https://github.com/jennybc/googlesheets)** makes taking advantage of this API in R possible.
 
 I have setup a Google account for the purposes of this project. There is already an existing Google sheet with the data used in the example eTool formatted exactly as it would need to be to run correctly. You can either create another sheet in the existing account or create your own. 
 
@@ -83,7 +83,10 @@ Again, this is not meant to be an exhaustive tutorial on R programming. However,
 See lines 31 though 41 in etool_ev_code.Rmd below:
 
 ```{r eval=FALSE}
-# curr_date <- mdy("5/1/2016")  # This line was purely for testing and can be deleted
+# curr_date <- mdy("5/1/2016")  # This line was purely for testing and can be deleted, instead use the current 
+# system date by uncommenting the line below
+
+# curr_date <- Sys.Date()
 
 googlesheets::gs_auth(token = "shiny_app_token.rds")  # This function will pass the 
 # login information contained in this rds to Google and grant you access to this Google 
@@ -109,14 +112,20 @@ start_data <- googlesheets::gs_read_csv(ss) %>%  # Lastly I take the list object
   distinct(serial_num, .keep_all = T)
 ```
 
-# Using Updated Data Altered Using the eTool
+# Testing the eTool
 
-The eTool is designed primarily to alter equipment data. Although there is some information about the equipment data shown, it is meant to describe the current state of the data only. Although the eTool displays the current state of the equipment data, the original and historical equipment data will be maintained in the Google sheet. Thus that data can be analyzed separately. In order to obtain all the data from the associated Google sheet use the code below. 
+Without any modification to the original code, you can run the eTool application locally on your machine from the code as it is assuming you have installed R and RStudio as well as all packages and dependencies shown in the eTool_dev_code.Rmd code. Click 'Run Document' at the top of the page.
+
+![](screen grabs/run document.jpg)
+
+# Using Updated Data
+
+The eTool is designed primarily to alter equipment data. Although there is some information about the equipment data shown, it is meant to describe the current state of the data only. Although the eTool displays the current state of the equipment data, the original and historical equipment data will be maintained in the Google sheet that serves as the data source for the eTool. Thus all equipment data both current and historical data can be analyzed separately. In order to obtain all the data from the associated Google sheet use the code below. 
 
 ```{r eval=FALSE}
 
-# The code below was also included in the eTool code. The object equip_data is a 
-# dataframe comrpised of the code at the Google sheets acoount specified in 
+# The code below was also included in the eTool application code. The object equip_data is a 
+# dataframe comprised of the code at the Google sheets acoount specified in 
 # the shiny_app_toke.rds file. 
 
 googlesheets::gs_auth(token = "shiny_app_token.rds")  

@@ -1,0 +1,73 @@
+---
+title: "Untitled"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+---
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(shiny)
+library(shinyWidgets)
+library(DT)
+library(tibble)
+library(lubridate)
+library(rmarkdown)
+library(leaflet)
+library(tidyr)
+library(ggplot2)
+library(stringr)
+library(gt)
+
+googlesheets::gs_auth(token = "shiny_app_token.rds")
+my_sheets <- googlesheets::gs_ls()
+
+sheet_key <- my_sheets$sheet_key[1]
+ss <- googlesheets::gs_key(my_sheets$sheet_key[1])
+
+start_data <- googlesheets::gs_read_csv(ss)
+
+# USE THIS AS THE TESTING AREA FOR WHAT I WANT AT THE END OF THE ETOOL DEV CODE
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+fluidPage(
+  fluidRow(
+  checkboxGroupInput(inputId = "attn_level",
+            label = "Choose Facilities with Equip Requiring Attention:",
+            choices = c("Immediately", "Immediately2"),
+            selected = "Immediately",
+            inline = T),
+
+checkboxGroupInput(inputId = "lab_select",
+            label = "Choose a Facility:",
+            choices = c("facility1", "facility2"),
+            selected = "facility1",
+            inline = T)
+)
+)
+
+
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+
+```
+
+### Chart C
+
+```{r}
+
+```
+

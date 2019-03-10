@@ -1,0 +1,12 @@
+name: etool_functionality_outline
+title: etool_functionality_outline
+username: rstudio
+account: rstudio
+server: localhost
+hostUrl: http://localhost:5000/rsconnect/__api__
+appId: 9
+bundleId: 9
+url: http://localhost:5000/rsconnect/content/9/
+when: 1552243633.55813
+asMultiple: FALSE
+asStatic: FALSE
