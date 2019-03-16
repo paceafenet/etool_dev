@@ -110,6 +110,8 @@ eTool
 Inputs {.sidebar data-width=350}
 -------------------------------------
 
+Click [here](https://travis-shinin-spot.shinyapps.io/new_equip_form/) to submit data for new equipment.
+
 ```{r}
 
 checkboxGroupInput(inputId = "attn_level",

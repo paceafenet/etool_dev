@@ -9,4 +9,5 @@ Below are several-related links
 3. [Report Describing Existing Data](https://github.com/paceafenet/etool_dev/blob/master/existing_lab_data_exploration.md)
 4. [Demo eTool](https://travis-shinin-spot.shinyapps.io/etool_dev/)
 5. [eTool Outline](https://github.com/paceafenet/etool_dev/blob/master/eTool%20Functionality%20Outline.pdf), click download to download a pdf copy
-
+6. [New Equipment Form](https://travis-shinin-spot.shinyapps.io/new_equip_form/) - use this form to enter data on newly introduced equipment
+7. [Project RStudio Cloud Account](https://rstudio.cloud/project/255745) - setup demo lessons for reference, can sign up with either Google or GitHub, can also use any email service
