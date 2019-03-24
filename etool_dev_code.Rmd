@@ -422,37 +422,3 @@ kableExtra::kable_styling(knitr::kable(tt3))
 
 ```
 
-Enter Equipment Data
-=====================================
-
-```{r}
-# Use test layout to work in
-
-## UI for each thing
-
-# Try fluid rows
-
-# Need to add logic for things like gps points
-
-# Check values button
-
-# Submit data
-
-```
-
-```{r}
-# Use reactive values
-
-# Make the reactive values into a df
-
-# View as table - dependent event
-
-# Submit writes to google sheets
-```
-
-
-
-
-
-
-
