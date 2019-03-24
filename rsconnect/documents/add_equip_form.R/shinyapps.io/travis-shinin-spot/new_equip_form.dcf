@@ -5,9 +5,9 @@ account: travis-shinin-spot
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 794454
-bundleId: 1944642
+bundleId: 1953762
 url: https://travis-shinin-spot.shinyapps.io/new_equip_form/
-when: 1552763004.49969
+when: 1553113072.74781
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: .bls_smtp_gmail_com|debug.log|email_proof_of_concept.Rmd|eTool Functionality Outline.pdf|etool_dev_code.Rmd|etool_functionality_outline.html|etool_functionality_outline.md|etool_functionality_outline.Rmd|existing_lab_data_exploration.md|existing_lab_data_exploration.Rmd|fake_equip_data_gen.html|fake_equip_data_gen.Rmd|README.html|README.md|scratchpad.Rmd|technical_documentation_eTool.pdf|technical_documentation_eTool.Rmd|test_layout.html|test_layout.Rmd|data/Cameroon Inventory.xlsx|data/fake_equip_data.csv|data/lab_equip_data.csv

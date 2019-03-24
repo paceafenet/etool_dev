@@ -1,13 +1,20 @@
 ---
 title: "Technical Documentation - eTool"
-description: |
-author: Travis Sondgerath
-date: "`r Sys.Date()`"
+author:
+  - name: Travis Sondgerath
+date: '`r Sys.Date()`'
 output:
-  pdf_document:
-    toc: TRUE
-    toc_depth: 2
+  pagedown::html_paged:
+    toc: true
+    self_contained: true
+toc-title: Contents
 ---
+
+<style>
+    a[href^="http"]:not([class="uri"])::after {
+  content: "";
+}
+</style>
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = T,
@@ -145,7 +152,6 @@ Below I highlight the names of several documents contained in this repository th
 
 1. etool_functionality_outline.Rmd
 * This code outlines the purpose, layout, and functionality of the eTool. This code produces the PDF document found **[here](https://github.com/paceafenet/etool_dev/blob/master/eTool%20Functionality%20Outline.pdf)**.
-
 2. fake_equip_data_gen.Rmd
 * This code produces the fake dataset used as the data source for the eTool. Because available in-country data was found to be lacking, I created a dataset with realistic data that could be procured to populate future versions of the eTool.
 

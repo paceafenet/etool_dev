@@ -17,6 +17,12 @@ output:
 toc-title: Contents
 ---
 
+<style>
+    a[href^="http"]:not([class="uri"])::after {
+  content: "";
+}
+</style>
+
 ```{r include=F}
 knitr::opts_chunk$set(warning = F,
                       echo = F,
