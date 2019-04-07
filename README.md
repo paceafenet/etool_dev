@@ -11,3 +11,4 @@ Below are several-related links
 5. [eTool Outline](https://github.com/paceafenet/etool_dev/blob/master/eTool%20Functionality%20Outline.pdf), click download to download a pdf copy
 6. [New Equipment Form](https://travis-shinin-spot.shinyapps.io/new_equip_form/) - use this form to enter data on newly introduced equipment
 7. [Project RStudio Cloud Account](https://rstudio.cloud/project/255745) - setup demo lessons for reference, can sign up with either Google or GitHub, can also use any email service
+8. [Add New Equipment Form User Guide](https://github.com/paceafenet/etool_dev/blob/master/New%20Equipment%20Form%20User%20Guide.pdf)
