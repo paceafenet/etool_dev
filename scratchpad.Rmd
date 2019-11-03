@@ -10,11 +10,18 @@ knitr::opts_chunk$set(echo = T,
                       message = F)
 
 library(dplyr)
+library(plyr)
 library(shiny)
 library(shinyWidgets)
 library(sparkline)
 library(DT)
 library(tibble)
+library(stringr)
+library(RCurl)
+library(rjson)
+library(lubridate)
+library(tibble)
+library(readr)
 
 ```
 
@@ -150,20 +157,44 @@ ss_data <- gs_read_csv(ss)  # Pulls the data as a df, may need to manipulate the
 ## Reading in ONA Data
 
 ```{r}
-privateData <- ona::onaDownload(formName = "Private_Data_For_Testing", 
-                                account = "ona_r", 
-                                uname = "ona_r", 
-                                pass = "ona_r")  # Only need for private forms
 
-# Creates privateData which is a S3 object with 5 sockets (most importantly data and form)
+# This appears to work most cleanly, unclear why my account credentails aren't working best. But I think either way you'd have to prepare an export to get data out of Ona directly
+
+# Export url
+
+tt <- read_csv(file = "https://api.ona.io/api/v1/export/1058966.csv")
+
+tt2 <- read_csv(file = "https://api.ona.io/api/v1/export/1058991.csv")
+
+## Didn't work
+
+privateData <- ona::onaDownload(formName = "Test Form", 
+                                account = "pacafenet",  # Name on the bottom
+                                uname = "pacafenet",  # Gues it's the same, I would try some things here, I think this is the issue 
+                                pass = "projectpi2018")  # Only need for private forms
+
+## Examples that did work, might want to revisit but I think ^^ is the way to go to just read from a url 
+
+good_eats <- ona::onaDownload("good_eats", "mberg","mberg") %>% 
+  as_tibble()
+
+
+tt <- matrix(unlist(good_eats@.Data))# %>% as_tibble()
+
+privateData <- onaDownload(formName = "Private_Data_For_Testing", 
+                           account = "ona_r", 
+                           uname = "ona_r", 
+                           pass = "ona_r")
 
 tt <- matrix(unlist(privateData@.Data),  # The data socket is a list
              nrow = 16,  # The number of fields in the form (also the number of lists in @.Data socket)
-             byrow = T)
+             byrow = T) %>% 
+  as_tibble()
 
 forms <- privateData@form %>% as_tibble()  # Already a data object
 
 # Use the forms to create a lookup since the choice number will be what appears in the data
+
 
 ```
 
