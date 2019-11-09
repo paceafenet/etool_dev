@@ -1,0 +1,89 @@
+---
+title: "Ona Data Pipeline"
+author: "Travis Sondgerath"
+date: "11/9/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = F,
+                      warning = F,
+                      message = F)
+
+library(dplyr)
+library(shiny)
+library(shinyWidgets)
+library(DT)
+library(tibble)
+library(lubridate)
+library(rmarkdown)
+library(leaflet)
+library(tidyr)
+library(ggplot2)
+library(stringr)
+library(gt)
+
+```
+
+## Get data from Equip Info
+
+```{r}
+
+```
+
+## Get data from Equip Activity
+
+```{r}
+
+```
+
+## Get data from Maintenance Requests
+
+```{r}
+
+```
+
+## Get data from Calibration Requests
+
+```{r}
+
+```
+
+## Write to googlesheets 
+
+```{r}
+## Need to create a new sheet to store the data for this phase of the project 
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
