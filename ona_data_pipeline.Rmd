@@ -23,37 +23,131 @@ library(tidyr)
 library(ggplot2)
 library(stringr)
 library(gt)
+library(readr)
 
 ```
 
 ## Get data from Equip Info
 
-```{r}
+Can register and change equipment info (like who the responsible engineer is)
+
+```{r warning=FALSE, message=FALSE}
+
+equip_info <- read_csv(file = "https://ona.io/pacafenet/99874/460026/download.csv?data-type=dataset") %>% 
+  mutate(retirement_flag = "No") %>%
+  rename(latitude = `_equip_location_latitude`,
+         longitude = `_equip_location_longitude`,
+         submission_time = "_submission_time",
+         submitted_by = "_submitted_by") %>% 
+  select(1:15, 17:18, 24, 29, 34) %>% 
+  arrange(desc(submission_time)) %>% 
+  distinct(equip_id, .keep_all = T)
 
 ```
 
 ## Get data from Equip Activity
 
-```{r}
+Can state when a piece of equipment was worked on. 
+Will need to use this data to join to what is in gsheets and update it. 
+
+```{r warning=FALSE, message=FALSE}
+
+# This needs to be combined with what is already in there
+
+activity_info <- read_csv(file = "https://ona.io/pacafenet/99874/460087/download.csv?data-type=dataset") %>% 
+  rename(submission_time = "_submission_time",
+         submitted_by = "_submitted_by",
+         equip_id = "Equipment_ID") %>% 
+  # mutate(equip_type = "",
+  #        manufacturer = "",
+  #        manufacture_date = "",
+  #        date_active = "",
+  #        facility = "",
+  #        ownership_type = "",
+  #        lab_level = "",
+  #        lab_level_is_other = "",
+  #        latitude = "",
+  #        longitude = "") %>% 
+  # # select(1, 22:29, 2:4, 7, 5:6, 30:31, 12, 17, 8)
+  select(1:8, 12, 17) %>%   # Testing
+  arrange(desc(submission_time)) %>% 
+  distinct(equip_id, .keep_all = T)
+
+## Testing for combined data
+
+tt <- bind_rows(equip_info %>% mutate_all(as.character), activity_info %>% mutate_all(as.character)) %>% 
+  group_by(equip_id) %>% 
+  arrange(desc(submission_time))
+
+tt_join <- left_join(x = equip_info, y = activity_info, by = "equip_id", suffix = c(".info",".activity")) %>% 
+  select(1:10, 21, 11, 22, 12, 23, 13, 24, 14, 25, 15, 26, 16, 20, 27, 17, 28, 18, 29) %>% 
+  mutate(calib_engineer_nm = if_else(condition = is.na(calib_engineer_nm.activity),  # Repeat this process for all others similar to this
+                                     true = calib_engineer_nm.info,
+                                     false = calib_engineer_nm.activity),
+         calib_engineer_post = if_else(condition = is.na(calib_engineer_post.activity),
+                                       true = calib_engineer_post.info,
+                                       false = calib_engineer_post.activity),
+         most_recent_calibration = if_else(condition = is.na(most_recent_calibration.activity),
+                                           true = most_recent_calibration.info,
+                                           false = most_recent_calibration.activity),
+         most_recent_maintenance = if_else(condition = is.na(most_recent_maintenance.activity),
+                                           true = most_recent_maintenance.info,
+                                           false = most_recent_maintenance.activity),
+         maintenance_engineer_nm = if_else(condition = is.na(maintenance_engineer_nm.activity),
+                                           true = maintenance_engineer_nm.info,
+                                           false = maintenance_engineer_nm.activity),
+         maintenance_engineer_post = if_else(condition = is.na(maintenance_engineer_post.activity),
+                                             true = maintenance_engineer_post.info,
+                                             false = maintenance_engineer_post.activity),
+         most_recent_maintenance = if_else(condition = is.na(most_recent_maintenance.activity),
+                                           true = most_recent_maintenance.info,
+                                           false = most_recent_maintenance.activity),
+         latitude = as.numeric(latitude),
+         longitude = as.numeric(longitude),
+         retirement_flag.activity = if_else(condition = is.na(retirement_flag.activity),
+                                            true = "No",
+                                            false = retirement_flag.activity),
+         retirement_flag = if_else(condition = retirement_flag.activity == "Yes" | retirement_flag.info == "Yes",
+                                   true = "Yes",
+                                   false = "No")) %>% 
+  select(-matches("info|activity"))
+
+# Good place to stop, pick up here on what needs to be done based on To do List
+  
+
+# Don't forget to just select the elements without .info and .activity
 
 ```
 
 ## Get data from Maintenance Requests
 
-```{r}
+Submit requests for maintenance. Need to figure out what is in gsheets. 
+
+```{r warning=FALSE, message=FALSE}
+
+# Needs to go to its own report to direct them to the activity form
+
+calib_req_info <- read_csv(file = "https://ona.io/pacafenet/99874/461478/download.csv?data-type=dataset")
 
 ```
 
 ## Get data from Calibration Requests
 
-```{r}
+Submit requests for calibration.
+
+```{r warning=FALSE, message=FALSE}
+
+maintenance_req_info <- read_csv(file = "https://ona.io/pacafenet/99874/461477/download.csv?data-type=dataset")
 
 ```
 
 ## Write to googlesheets 
 
-```{r}
-## Need to create a new sheet to store the data for this phase of the project 
+```{r warning=FALSE, message=FALSE}
+
+# Need to create a new sheet to store the data for this phase of the project 
+
+# Need to pull the data from googlesheets and then reconcile with Gsheets 
 
 ```
 
