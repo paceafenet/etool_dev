@@ -152,8 +152,6 @@ activity_req <- full_join(x = calib_req_info, y = maintenance_req_info, by = "eq
                                              false = "No")) %>% 
   select(equip_id, calibration_request_date, submission_time_calib, maintenance_request_date, submission_time_maint, submitted_by, activity_required_calib, activity_required_maint, retirement_flag, expected_retirement_date, next_expected_calibration, next_expected_maintenance)
 
-
-
 ```
 
 
