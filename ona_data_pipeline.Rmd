@@ -5,7 +5,13 @@ date: "11/9/2019"
 output: html_document
 ---
 
+ALL of this code can go in the app definition during setup,
+  
+Working with activity_req, curr_data, and probably want to use equip_info and activity_info for any historical reporting data. 
+
 ```{r setup, include=FALSE}
+
+
 
 knitr::opts_chunk$set(echo = F,
                       warning = F,
@@ -58,30 +64,17 @@ activity_info <- read_csv(file = "https://ona.io/pacafenet/99874/460087/download
   rename(submission_time = "_submission_time",
          submitted_by = "_submitted_by",
          equip_id = "Equipment_ID") %>% 
-  # mutate(equip_type = "",
-  #        manufacturer = "",
-  #        manufacture_date = "",
-  #        date_active = "",
-  #        facility = "",
-  #        ownership_type = "",
-  #        lab_level = "",
-  #        lab_level_is_other = "",
-  #        latitude = "",
-  #        longitude = "") %>% 
-  # # select(1, 22:29, 2:4, 7, 5:6, 30:31, 12, 17, 8)
-  select(1:8, 12, 17) %>%   # Testing
+  select(1:8, 12, 17) %>% 
   arrange(desc(submission_time)) %>% 
   distinct(equip_id, .keep_all = T)
 
-## Testing for combined data
+#####################################
+# Use for reporting out current state
+#####################################
 
-tt <- bind_rows(equip_info %>% mutate_all(as.character), activity_info %>% mutate_all(as.character)) %>% 
-  group_by(equip_id) %>% 
-  arrange(desc(submission_time))
-
-tt_join <- left_join(x = equip_info, y = activity_info, by = "equip_id", suffix = c(".info",".activity")) %>% 
+curr_data <- left_join(x = equip_info, y = activity_info, by = "equip_id", suffix = c(".info",".activity")) %>% 
   select(1:10, 21, 11, 22, 12, 23, 13, 24, 14, 25, 15, 26, 16, 20, 27, 17, 28, 18, 29) %>% 
-  mutate(calib_engineer_nm = if_else(condition = is.na(calib_engineer_nm.activity),  # Repeat this process for all others similar to this
+  mutate(calib_engineer_nm = if_else(condition = is.na(calib_engineer_nm.activity),  
                                      true = calib_engineer_nm.info,
                                      false = calib_engineer_nm.activity),
          calib_engineer_post = if_else(condition = is.na(calib_engineer_post.activity),
@@ -110,46 +103,60 @@ tt_join <- left_join(x = equip_info, y = activity_info, by = "equip_id", suffix 
          retirement_flag = if_else(condition = retirement_flag.activity == "Yes" | retirement_flag.info == "Yes",
                                    true = "Yes",
                                    false = "No")) %>% 
-  select(-matches("info|activity"))
+  select(-matches("info|activity")) %>% 
+  mutate(expected_retirement_date = date_active + 720,
+         next_expected_calibration = most_recent_calibration + 90,
+         next_expected_maintenance = most_recent_maintenance + 180)
 
-# Good place to stop, pick up here on what needs to be done based on To do List
-  
 
-# Don't forget to just select the elements without .info and .activity
 
 ```
 
-## Get data from Maintenance Requests
-
-Submit requests for maintenance. Need to figure out what is in gsheets. 
+## Get data from Activity Requests
 
 ```{r warning=FALSE, message=FALSE}
 
-# Needs to go to its own report to direct them to the activity form
+calib_req_info <- read_csv(file = "https://ona.io/pacafenet/99874/461478/download.csv?data-type=dataset") %>% 
+  rename(submission_time = "_submission_time",
+         submitted_by = "_submitted_by",
+         equip_id = "Equipment_ID") %>% 
+  select(1:2, 6, 11) %>% 
+  arrange(desc(submission_time)) %>% 
+  distinct(equip_id, .keep_all = T)
 
-calib_req_info <- read_csv(file = "https://ona.io/pacafenet/99874/461478/download.csv?data-type=dataset")
+maintenance_req_info <- read_csv(file = "https://ona.io/pacafenet/99874/461477/download.csv?data-type=dataset") %>% 
+  rename(submission_time = "_submission_time",
+         submitted_by = "_submitted_by",
+         equip_id = "Equipment_ID") %>% 
+  select(1:2, 6, 11) %>% 
+  arrange(desc(submission_time)) %>% 
+  distinct(equip_id, .keep_all = T)
+
+activity_req <- full_join(x = calib_req_info, y = maintenance_req_info, by = "equip_id", suffix = c("_calib", "_maint")) %>% 
+  mutate(submitted_by = if_else(condition = is.na(submitted_by_calib),
+                                true = submitted_by_maint,
+                                false = submitted_by_calib)) %>% 
+  select(-submitted_by_calib, -submitted_by_maint) %>% 
+  left_join(x = ., y = curr_data[ , c(1, 14:15, 18:21)], by = "equip_id") %>% 
+  mutate(activity_required_calib = if_else(condition = (calibration_request_date > most_recent_calibration &
+                                               !is.na(calibration_request_date) &
+                                               retirement_flag != "Yes") |
+                                             next_expected_calibration < most_recent_calibration,
+                                             true = "Yes",
+                                             false = "No"),
+         activity_required_maint = if_else(condition = (maintenance_request_date > most_recent_maintenance &
+                                               !is.na(maintenance_request_date) &
+                                               retirement_flag != "Yes") |
+                                             next_expected_maintenance < most_recent_maintenance,
+                                             true = "Yes",
+                                             false = "No")) %>% 
+  select(equip_id, calibration_request_date, submission_time_calib, maintenance_request_date, submission_time_maint, submitted_by, activity_required_calib, activity_required_maint, retirement_flag, expected_retirement_date, next_expected_calibration, next_expected_maintenance)
+
+
 
 ```
 
-## Get data from Calibration Requests
 
-Submit requests for calibration.
-
-```{r warning=FALSE, message=FALSE}
-
-maintenance_req_info <- read_csv(file = "https://ona.io/pacafenet/99874/461477/download.csv?data-type=dataset")
-
-```
-
-## Write to googlesheets 
-
-```{r warning=FALSE, message=FALSE}
-
-# Need to create a new sheet to store the data for this phase of the project 
-
-# Need to pull the data from googlesheets and then reconcile with Gsheets 
-
-```
 
 
 
