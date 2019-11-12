@@ -108,8 +108,6 @@ curr_data <- left_join(x = equip_info, y = activity_info, by = "equip_id", suffi
          next_expected_calibration = most_recent_calibration + 90,
          next_expected_maintenance = most_recent_maintenance + 180)
 
-
-
 ```
 
 ## Get data from Activity Requests
