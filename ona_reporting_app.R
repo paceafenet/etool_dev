@@ -157,6 +157,9 @@ curr_data <- left_join(x = equip_info, y = activity_info, by = "equip_id", suffi
          most_recent_maintenance = if_else(condition = is.na(most_recent_maintenance.activity),
                                            true = most_recent_maintenance.info,
                                            false = most_recent_maintenance.activity),
+         submitted_by = if_else(condition = is.na(submitted_by.activity),
+                                true = submitted_by.info,
+                                false = submitted_by.activity),
          latitude = as.numeric(latitude),
          longitude = as.numeric(longitude),
          retirement_flag = if_else(condition = is.na(retirement_flag),
@@ -191,7 +194,7 @@ curr_data_activity_req <- full_join(x = calib_req_info, y = maintenance_req_info
                                 true = submitted_by_maint,
                                 false = submitted_by_calib)) %>% 
   select(-submitted_by_calib, -submitted_by_maint) %>% 
-  right_join(x = ., y = curr_data, by = "equip_id") %>% 
+  right_join(x = ., y = curr_data, by = "equip_id") %>%  # Here's the issue 
   mutate(activity_required_calib = if_else(condition = (calibration_request_date > most_recent_calibration &
                                                           !is.na(calibration_request_date) &
                                                           retirement_flag != "Yes") |
@@ -203,11 +206,13 @@ curr_data_activity_req <- full_join(x = calib_req_info, y = maintenance_req_info
                                                           retirement_flag != "Yes") |
                                              next_expected_maintenance < most_recent_maintenance,
                                            true = "Yes",
-                                           false = "No")) 
+                                           false = "No"),
+         submitted_by = submitted_by.y) %>% 
+  select(-submitted_by.x, -submitted_by.y)
 
 #########################################################################################################
 
-# UI
+# Application # 
 
 ui <- dashboardPage(
   
@@ -286,6 +291,8 @@ ui <- dashboardPage(
                 )
               ),
               
+              # Need to add a download button as well 
+              
               fluidRow(gt_output("equip_details_table"))
             
               ),  # An individual layout for one of the tabs
@@ -308,22 +315,71 @@ ui <- dashboardPage(
   
 )
 
-# Server
-
 server <- function(input, output, session) {
   
   output$equip_details_table <- render_gt({
     
-    tt <- curr_data_activity_req %>% 
-      # Add filters
+    tt <- curr_data_activity_req %>%   
       filter(equip_type %in% c(input$equipment_type) &
                facility %in% c(input$facility) &
-               submitted_by %in% c(input$submitted_by)) %>% 
-      gt()
-      # cols_hide() %>%  # Hide columns from the view but leave them in the data
-      # cols_label() %>%  # Rename the columns 
-      # cells_styles()  # Use to get conditional formatting
-      # Add title/sub as well as other common table options 
+               submitted_by %in% c(input$submitted_by)  # Filters aren't working because of this one
+             ) %>%
+      gt() %>% 
+      cols_align(align = "center") %>%
+      cols_hide(columns = vars(calibration_request_date,
+                               submission_time_calib,
+                               maintenance_request_date,
+                               submission_time_maint,
+                               lab_level_is_other,
+                               latitude,
+                               longitude,
+                               # retirement_flag,
+                               most_recent_calibration,
+                               most_recent_maintenance,
+                               expected_retirement_date,
+                               next_expected_calibration,
+                               next_expected_maintenance,
+                               activity_required_calib,
+                               activity_required_maint)) %>%  
+      cols_move(columns = vars(ownership_type),
+                after = vars(lab_level)) %>%  
+      cols_move(columns = vars(retirement_flag),
+                after = vars(maintenance_engineer_post)) %>%  
+      cols_label(equip_id = "Equipment ID", 
+                 submitted_by = "Submitted by",
+                 equip_type = "Equipment Type",
+                 manufacturer = "Manufacturer",
+                 manufacture_date = "Manufacture Date",
+                 date_active = "Date Active",  # This date is getting squeezed, aparently cols_width is a thing need to update gt
+                 facility = "Facility",
+                 ownership_type = "Ownership Type",
+                 lab_level = "Facility Level", 
+                 calib_engineer_nm = "Calibration Engineer Name",
+                 calib_engineer_post = "Calibration Engineer Post", 
+                 maintenance_engineer_nm = "Maintenance Engineer Name",
+                 maintenance_engineer_post = "Maintenance Engineer Post",
+                 retirement_flag = "Retirement Flag") %>%  # Rename the columns
+      cols_width(vars(date_active) ~ px(100),
+                 vars(equip_id) ~ px(80),
+                 vars(manufacturer) ~ px(125)) %>% 
+      tab_style(style = list(cell_fill(color = "white"),
+                             cell_text(color = "red")),  
+                locations = cells_data(columns = vars(equip_id),
+                                       rows = activity_required_calib == "Yes" | activity_required_maint == "Yes")) %>% 
+      tab_style(style = list(cell_fill(color = "white"),
+                             cell_text(color = "red")),  
+                locations = cells_data(columns = vars(retirement_flag),
+                                       rows = retirement_flag == "Yes")) %>% 
+      tab_header(title = "Detailed Equipment Information") %>%
+      tab_footnote(footnote = "Red indicates equipment needs attention.",
+                   locations = cells_column_labels(columns = vars(equip_id))) %>% 
+      tab_footnote(footnote = "Equipment flagged for retirement.",
+                   locations = cells_column_labels(columns = vars(retirement_flag))) %>% 
+      tab_options(row.striping.include_stub = T,
+                  row.striping.include_table_body = T,
+                  table.border.top.color = "black",
+                  table_body.border.bottom.color = "black",
+                  table.width = "80%")
     
   })
   
