@@ -43,6 +43,12 @@ library(blastula)
 #                         password = "projectpi2018",
 #                         provider = "gmail",
 #                         sender = "Travis")
+
+# create_email_creds_file(user = "tsondgerath@atiba.com",
+#                         password = "Cubs2010!",
+#                         provider = "office365",
+#                         sender = "Travis")
+
 ```
 
 ## Get Data
@@ -166,6 +172,23 @@ for(i in unique(ss_data$calib_engineer_nm)){
 ```
 
 
+```{r warning=FALSE, message=FALSE}
+
+email <- compose_email(body = paste0("This is a test email.")) #%>% 
+      # preview_email()  # Comment this part out once I'm ready to send a test email - needs to be an email object
+  
+  # Would need to add a lookup table like my progress reports for the correct emails
+  
+email %>% 
+  smtp_send()
+
+  send_email_out(message = email,
+                 from = "tsondger@gmail.com",
+                 to = "tsondger@gmail.com",
+                 subject = "Attn: Test Email",
+                 creds_file = ".bls_smtp_gmail_com")
+
+```
 
 
 
