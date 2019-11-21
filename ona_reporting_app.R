@@ -98,7 +98,7 @@ equip_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/460026/
                              true = lead(longitude),
                              false = longitude)) 
 
-activity_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/460087/download.csv?data-type=dataset") %>%  # Equipment Activity Form
+activity_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/460087/download.csv?data-type=dataset") %>%  
   rename(submission_time = "_submission_time",
          submitted_by = "_submitted_by",
          equip_id = "Equipment_ID") %>% 
@@ -126,8 +126,6 @@ activity_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/4600
          retirement_flag = if_else(condition = is.na(retirement_flag),  
                                    true = lead(retirement_flag, n = 1),
                                    false = retirement_flag)) 
-
-# Need to update with references to other historical datasets ^^
 
 historical_data <- left_join(x = equip_info_historical, y = activity_info_historical, by = "equip_id", suffix = c(".info",".activity")) %>% 
   mutate(calib_engineer_nm = if_else(condition = is.na(calib_engineer_nm.activity),  
@@ -167,10 +165,7 @@ historical_data <- left_join(x = equip_info_historical, y = activity_info_histor
                                    true = submission_time.activity,
                                    false = submission_time.info),
          submission_date = ymd(str_sub(string = submission_time, start = 1, end = 10))) %>% 
-  select(-matches("info|activity")) #%>% 
-  # mutate(expected_retirement_date = date_active + 720,  # Don't think I need
-         # next_expected_calibration = most_recent_calibration + 90,  # Don't think I need
-         # next_expected_maintenance = most_recent_maintenance + 180)  # Don't think I need
+  select(-matches("info|activity")) 
 
 #########################################################################################################
 
@@ -312,7 +307,7 @@ calib_req_info <- read_csv(file = "https://ona.io/pacafenet/99874/461478/downloa
          equip_id = "Equipment_ID") %>%
   mutate(submission_date = ymd(str_sub(string = submission_time, start = 1, end = 10))) %>% 
   select(1:2, 6, 11, 16) %>% 
-  arrange(desc(submission_time)) %>% 
+  arrange(equip_id, desc(submission_time)) %>% 
   distinct(equip_id, .keep_all = T)
 
 maintenance_req_info <- read_csv(file = "https://ona.io/pacafenet/99874/461477/download.csv?data-type=dataset") %>% 
@@ -321,7 +316,7 @@ maintenance_req_info <- read_csv(file = "https://ona.io/pacafenet/99874/461477/d
          equip_id = "Equipment_ID") %>% 
   mutate(submission_date = ymd(str_sub(string = submission_time, start = 1, end = 10))) %>% 
   select(1:2, 6, 11, 16) %>% 
-  arrange(desc(submission_time)) %>% 
+  arrange(equip_id, desc(submission_time)) %>% 
   distinct(equip_id, .keep_all = T)
 
 curr_data_activity_req <- full_join(x = calib_req_info, y = maintenance_req_info, by = "equip_id", suffix = c("_calib", "_maint")) %>% 
@@ -342,7 +337,11 @@ curr_data_activity_req <- full_join(x = calib_req_info, y = maintenance_req_info
                                              next_expected_maintenance < most_recent_maintenance,
                                            true = "Yes",
                                            false = "No"),
-         submitted_by = submitted_by.y) %>% 
+         submitted_by = submitted_by.y,
+         submission_date = if_else(condition = submission_date_calib > submission_date_maint &
+                                     !is.na(submission_date_calib),
+                                   true = submission_date_calib,
+                                   false = submission_date_maint)) %>% 
   select(-submitted_by.x, -submitted_by.y)
 
 #########################################################################################################
@@ -377,7 +376,7 @@ ui <- dashboardPage(
                               tabName = "equip_activity_details",
                               icon = icon("table")),
                      
-                     menuItem(text = "Equipment Maintenance Requests",  # The one I'm currently working on, use historical_data
+                     menuItem(text = "Equipment Maintenance Requests",  # The one I'm currently working on, use curr_data_activity_req
                               tabName = "equip_activity_requests",
                               icon = icon("bullhorn"))
                      
@@ -386,6 +385,8 @@ ui <- dashboardPage(
   dashboardBody(
     
     tabItems(  # Has to hold the layout for each item I want to show for each tab specified ^^
+      
+      # SOMETHING TO CONSIDER - might want to connect all the UI so the dropdowns are uniform and carry over bw tabs
       
       tabItem(tabName = "overview_info",
               
@@ -475,7 +476,7 @@ ui <- dashboardPage(
                                    multiple = T,
                                    options = list(`actions-box` = T,
                                                   `live-search` = T))
-                )#,
+                )
                 
                 
               ), 
@@ -546,16 +547,58 @@ ui <- dashboardPage(
                             
               ),
       
-      # HERE
       tabItem(tabName = "equip_activity_requests",  # The one I'm currently working on, think I can use curr_data_activity_req
               
               # h4("Test Page 4"),
               
-              fluidRow(),  # Inputs
+              fluidRow(
+                
+                column(width = 3,
+                       pickerInput(inputId = "equipment_id_req",
+                                   label = "Choose Equipment ID(s):",
+                                   choices = sort(unique(curr_data_activity_req$equip_id)),
+                                   selected = sort(unique(curr_data_activity_req$equip_id)),
+                                   multiple = T,
+                                   options = list(`actions-box` = T,
+                                                  `live-search` = T))
+                ),
+                
+                column(width = 3,
+                       pickerInput(inputId = "facility_req",
+                                   label = "Choose Facilitie(s):",
+                                   choices = sort(unique(curr_data_activity_req$facility)),
+                                   selected = sort(unique(curr_data_activity_req$facility)),
+                                   multiple = T,
+                                   options = list(`actions-box` = T,
+                                                  `live-search` = T))
+                ),
+                
+                # Might want to split dates into a separate row
+                
+                column(width = 3,
+                       dateRangeInput(inputId = "dt_calibration_req",
+                                      label = "Select Calibration Request Date Range:",
+                                      start = min(curr_data_activity_req$calibration_request_date, na.rm = T),
+                                      end = max(curr_data_activity_req$calibration_request_date, na.rm = T),
+                                      min = min(curr_data_activity_req$calibration_request_date, na.rm = T),
+                                      max = max(curr_data_activity_req$calibration_request_date, na.rm = T))
+                ),
+                
+                column(width = 3,
+                       dateRangeInput(inputId = "dt_maintenance_req",
+                                      label = "Select Maintenance Request Date Range:",
+                                      start = min(curr_data_activity_req$maintenance_request_date, na.rm = T),
+                                      end = max(curr_data_activity_req$maintenance_request_date, na.rm = T),
+                                      min = min(curr_data_activity_req$maintenance_request_date, na.rm = T),
+                                      max = max(curr_data_activity_req$maintenance_request_date, na.rm = T))
+                )
+                
+              ),
               
-              fluidRow(),  # Table
+              fluidRow(gt_output("equip_req_table")),
               
-              fluidRow()  # Download
+              fluidRow(downloadButton(outputId = "download_equip_req_details",
+                                      label = "Download Data"))
               
               )
     )
@@ -805,6 +848,121 @@ server <- function(input, output, session) {
   )
   
   # Start the Activity Requests tab
+  
+  output$equip_req_table <- render_gt({
+
+    tt <- curr_data_activity_req %>%
+      filter(equip_id %in% c(input$equipment_id_req) &
+               facility %in% c(input$facility_req) &
+               (is.na(calibration_request_date) |
+                (calibration_request_date >= input$dt_calibration_req[1] &
+                   calibration_request_date <= input$dt_calibration_req[2])) &
+               (is.na(maintenance_request_date) |
+                  (maintenance_request_date >= input$dt_maintenance_req[1] &
+                     maintenance_request_date <= input$dt_maintenance_req[2]))) %>%
+      gt() %>%
+      cols_align(align = "center") #%>%
+  #     cols_hide(columns = vars(calibration_request_date,
+  #                              submission_time_calib,
+  #                              maintenance_request_date,
+  #                              submission_time_maint,
+  #                              lab_level_is_other,
+  #                              latitude,
+  #                              longitude,
+  #                              most_recent_calibration,
+  #                              most_recent_maintenance,
+  #                              expected_retirement_date,
+  #                              next_expected_calibration,
+  #                              next_expected_maintenance,
+  #                              activity_required_calib,
+  #                              activity_required_maint)) %>%  
+  #     cols_move(columns = vars(ownership_type),
+  #               after = vars(lab_level)) %>%  
+  #     cols_move(columns = vars(retirement_flag),
+  #               after = vars(maintenance_engineer_post)) %>%  
+  #     cols_label(equip_id = "Equipment ID", 
+  #                submitted_by = "Submitted by",
+  #                equip_type = "Equipment Type",
+  #                manufacturer = "Manufacturer",
+  #                manufacture_date = "Manufacture Date",
+  #                date_active = "Date Active",
+  #                facility = "Facility",
+  #                ownership_type = "Ownership Type",
+  #                lab_level = "Facility Level", 
+  #                calib_engineer_nm = "Calibration Engineer Name",
+  #                calib_engineer_post = "Calibration Engineer Post", 
+  #                maintenance_engineer_nm = "Maintenance Engineer Name",
+  #                maintenance_engineer_post = "Maintenance Engineer Post",
+  #                retirement_flag = "Retirement Flag") %>%
+  #     cols_width(vars(date_active) ~ px(100),
+  #                vars(equip_id) ~ px(80),
+  #                vars(manufacturer) ~ px(125)) %>% 
+  #     tab_style(style = list(cell_fill(color = "white"),
+  #                            cell_text(color = "red")),  
+  #               locations = cells_data(columns = vars(equip_id),
+  #                                      rows = activity_required_calib == "Yes" | activity_required_maint == "Yes")) %>% 
+  #     tab_style(style = list(cell_fill(color = "white"),
+  #                            cell_text(color = "red")),  
+  #               locations = cells_data(columns = vars(retirement_flag),
+  #                                      rows = retirement_flag == "Yes")) %>% 
+  #     tab_header(title = "Detailed Equipment Information") %>%
+  #     tab_footnote(footnote = "Red indicates equipment needs attention.",
+  #                  locations = cells_column_labels(columns = vars(equip_id))) %>% 
+  #     tab_footnote(footnote = "Equipment flagged for retirement.",
+  #                  locations = cells_column_labels(columns = vars(retirement_flag))) %>% 
+  #     tab_options(row.striping.include_stub = T,
+  #                 row.striping.include_table_body = T,
+  #                 table.border.top.color = "black",
+  #                 table_body.border.bottom.color = "black",
+  #                 table.width = "80%")
+
+  })
+
+  # output$download_equip_details <- downloadHandler(
+  #   
+  #   filename = function(){
+  #     paste0("Equipment Details Data ", Sys.Date(), ".xlsx")},
+  #   
+  #   content = function(file){
+  #     xlsx::write.xlsx(as.data.frame(equip_details_export <- curr_data_activity_req %>%
+  #                                      filter(equip_type %in% c(input$equipment_type) &
+  #                                               facility %in% c(input$facility) &
+  #                                               submitted_by %in% c(input$submitted_by)) %>%
+  #                                      select(equip_id,
+  #                                             submitted_by,
+  #                                             equip_type,
+  #                                             manufacturer,
+  #                                             manufacture_date,
+  #                                             date_active,
+  #                                             facility,
+  #                                             ownership_type,
+  #                                             lab_level,
+  #                                             calib_engineer_nm,
+  #                                             calib_engineer_post,
+  #                                             maintenance_engineer_nm,
+  #                                             maintenance_engineer_post,
+  #                                             retirement_flag) %>%
+  #                                      rename("Equip ID" = equip_id,
+  #                                             "Submitted by" = submitted_by,
+  #                                             "Equipment Type" = equip_type,
+  #                                             "Manufacturer" = manufacturer,
+  #                                             "Manufacture Date" = manufacture_date,
+  #                                             "Date Active" = date_active,
+  #                                             "Facility" = facility,
+  #                                             "Ownership Type" = ownership_type,
+  #                                             "Facility Level" = lab_level,
+  #                                             "Calibration Engineer Name" = calib_engineer_nm,
+  #                                             "Calibration Engineer Post" = calib_engineer_post,
+  #                                             "Maintenance Engineer Name" = maintenance_engineer_nm,
+  #                                             "Maintenance Engineer Post" = maintenance_engineer_post,
+  #                                             "Retirement Flag" = retirement_flag)),
+  #                      file = file, 
+  #                      sheetName = "Equip Details",
+  #                      showNA = F,
+  #                      row.names = F,
+  #                      append = F)
+  #   }
+  # )
   
 }
 
