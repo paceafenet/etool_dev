@@ -12,6 +12,11 @@
     
     # Maintenance Request Form: https://ona.io/pacafenet/99874/461477
 
+# Make sure any info referencing requests makes clear this is based on the most recent request for each
+# piece of equipment. 
+
+# Make sure the boxes are the right width and height
+
 ### To Consider Later ###
 
 # Do I want to have warnings? Yellow rather than just red? Color based on how long requests open? 
@@ -136,6 +141,28 @@ activity_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/4600
          retirement_flag = if_else(condition = is.na(retirement_flag),  
                                    true = lead(retirement_flag, n = 1),
                                    false = retirement_flag)) 
+
+calib_req_info_hist <- read_csv(file = "https://ona.io/pacafenet/99874/461478/download.csv?data-type=dataset") %>%
+  rename(submission_time = "_submission_time",
+         submitted_by = "_submitted_by",
+         equip_id = "Equipment_ID") %>%
+  mutate(submission_date = ymd(str_sub(string = submission_time, start = 1, end = 10))) %>%
+  select(1:2, 6, 11, 16) %>%
+  arrange(equip_id, desc(submission_time))
+
+maintenance_req_info_hist <- read_csv(file = "https://ona.io/pacafenet/99874/461477/download.csv?data-type=dataset") %>%
+  rename(submission_time = "_submission_time",
+         submitted_by = "_submitted_by",
+         equip_id = "Equipment_ID") %>%
+  mutate(submission_date = ymd(str_sub(string = submission_time, start = 1, end = 10))) %>%
+  select(1:2, 6, 11, 16) %>%
+  arrange(equip_id, desc(submission_time))
+
+req_info_hist <- full_join(x = calib_req_info_hist, y = maintenance_req_info_hist, by = "equip_id", suffix = c("_calib", "_maint")) %>% 
+  mutate(submitted_by = if_else(condition = is.na(submitted_by_calib),
+                                true = submitted_by_maint,
+                                false = submitted_by_calib)) %>% 
+  select(-submitted_by_calib, -submitted_by_maint)
 
 historical_data <- left_join(x = equip_info_historical, y = activity_info_historical, by = "equip_id", suffix = c(".info",".activity")) %>% 
   mutate(calib_engineer_nm = if_else(condition = is.na(calib_engineer_nm.activity),  
@@ -391,7 +418,40 @@ ui <- dashboardPage(
       
       tabItem(tabName = "overview_info",
               
-              h4("Test Page 1")
+              # h4("Test Page 1")
+              
+              # fluidRow(),  # UI - going to go without to start
+              
+              fluidRow(  # Consider adding offsets
+                
+                valueBoxOutput(outputId = "kpi_pieces_active_equip",
+                               width = 2),  # Adjust if necessary
+                
+                valueBoxOutput(outputId = "kpi_pieces_need_attention",
+                               width = 2),  
+                
+                valueBoxOutput(outputId = "kpi_total_requests",  # req_info_hist
+                               width = 2),
+                
+                valueBoxOutput(outputId = "kpi_total_outstanding_requests",  # Need to join current data with req_info_hist
+                               width = 2),
+                
+                valueBoxOutput(outputId = "kpi_requests_answered",
+                               width = 2)
+                
+              ),  # Boxes/KIP's
+              
+              fluidRow(tabBox(title = strong("Equipment Requiring Attention by Category"),  # May want to move the title for these boxes
+                              id = "attention_tabset",
+                              tabPanel(title = "Lab Count",
+                                       gt_output("equip_by_lab_table")),
+                              tabPanel(title = "Lab Pct",
+                                       gt_output("equip_by_lab_pct_table")),
+                              tabPanel(title = "Attention Category",
+                                       gt_output("equip_by_attention_category_table")),
+                              tabPanel(title = "Lab Level",
+                                       gt_output("equip_attention_by_level"))
+              ))  # Graphs
               
               ),
       
@@ -949,6 +1009,69 @@ server <- function(input, output, session) {
                        append = F)
     }
   )
+  
+  output$kpi_pieces_active_equip <- renderValueBox(  # Current data
+    valueBox(value = prettyNum(tt <- curr_data_activity_req %>% 
+                                 filter(retirement_flag == "No")%>% 
+                                 nrow(), 
+                               big.mark = ","),
+             
+             subtitle = "Active Pieces of Equipment")
+  )
+  
+  output$kpi_pieces_need_attention <- renderValueBox(  # Current data
+    valueBox(value = prettyNum(tt <- curr_data_activity_req %>% 
+                                 filter(retirement_flag == "No" &
+                                          (activity_required_calib == "Yes" | activity_required_maint == "Yes")) %>% 
+                                 nrow(), 
+                               big.mark = ","),
+             
+             subtitle = "Equipment Needing Immediate Attention")
+  )
+  
+  output$kpi_total_requests <- renderValueBox(  # req_info_hist
+    valueBox(value = prettyNum(tt <- req_info_hist %>% 
+                                 nrow(),
+                               big.mark = ","),
+
+             subtitle = "Number of Requests Made")
+  )
+
+  # output$kpi_total_outstanding_requests <- renderValueBox(  # Current data?? Or just requests? This might be the toughest to do. 
+  #   valueBox(value = ,
+  #            
+  #            subtitle = )
+  # )
+  # 
+  # output$kpi_requests_answered <- renderValueBox(  # Historical data
+  #   valueBox(value = ,
+  #            
+  #            subtitle = )
+  # )
+  # 
+  # output$equip_by_lab_table <- render_gt({  # Current data
+  #   
+  #   
+  #   
+  # })
+  # 
+  # output$equip_by_lab_pct_table <- render_gt({  # Current data
+  #   
+  #   
+  #   
+  # })
+  # 
+  # output$equip_by_attention_category_table <- render_gt({  # Current data
+  #   
+  #   
+  #   
+  # })
+  # 
+  # output$equip_attention_by_level <- render_gt({  # Current data
+  #   
+  #   
+  #   
+  # })
   
 }
 
