@@ -1,0 +1,13 @@
+name: ona_reporting_app
+title: ona_reporting_app
+username:
+account: travis-shinin-spot
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 1524018
+bundleId: 2616760
+url: https://travis-shinin-spot.shinyapps.io/ona_reporting_app/
+when: 1574711714.99969
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .bls_smtp_gmail_com|.httr-oauth|add_equip_form.R|add_new_equipment_form_ug.html|add_new_equipment_form_ug.Rmd|Application Summary.pptx|debug.log|email_proof_of_concept.Rmd|eTool Functionality Outline.pdf|etool_dev_code.Rmd|etool_functionality_outline.html|etool_functionality_outline.md|etool_functionality_outline.Rmd|existing_lab_data_exploration.md|existing_lab_data_exploration.Rmd|fake_equip_data_gen.html|fake_equip_data_gen.Rmd|google_authentication.R|New Equipment Form User Guide.pdf|ona_data_pipeline_draft.Rmd|README.html|README.md|scratchpad.Rmd|shiny_app_token.rds|Technical Documentation - eTool.pdf|technical_documentation_eTool.html|technical_documentation_eTool.Rmd|test_layout.html|test_layout.Rmd|data/Cameroon Inventory.xlsx|data/fake_equip_data.csv|data/lab_equip_data.csv

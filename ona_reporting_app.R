@@ -2,22 +2,13 @@
 ###########################################################################################################
 # Notes #
 
-# Have to make sure that links are to surveys are included in the app where relevant to re-route. See below
+# Made some pretty minor edits, be sure to push code to shinyapps whenever I'm actually reviewing progress
+# with the Africa folks. 
 
-    # Equip Info Form: https://ona.io/pacafenet/99874/460026/download.csv?data-type=dataset
-    
-    # Equip Activity Form: https://ona.io/pacafenet/99874/460087
-    
-    # Calibration Request Form: https://ona.io/pacafenet/99874/461478
-    
-    # Maintenance Request Form: https://ona.io/pacafenet/99874/461477
+### To ConsiderLater ###
 
-# Make sure any info referencing requests makes clear this is based on the most recent request for each
-# piece of equipment. 
-
-# Make sure the boxes are the right width and height
-
-### To Consider Later ###
+# Change the layout, have to scroll down to view everything, see Rstudio layout guide. Might want to get rid
+# of sidebar or make other changes.
 
 # Do I want to have warnings? Yellow rather than just red? Color based on how long requests open? 
 
@@ -27,7 +18,7 @@
 
 # Might want to add offsets to columns  for UI
 
-#########################
+#######################
 
 #########################################################################################################
 
@@ -49,6 +40,7 @@ library(readr)
 library(shinydashboard)
 library(dashboardthemes)
 library(shinyWidgets)
+library(plotly)
 
 ### Data pipeline
 
@@ -210,7 +202,7 @@ historical_data <- left_join(x = equip_info_historical, y = activity_info_histor
 
 # Current State #
 
-equip_info <- read_csv(file = "https://ona.io/pacafenet/99874/460026/download.csv?data-type=dataset") %>%  # Equip Info form
+equip_info <- read_csv(file = "https://ona.io/pacafenet/99874/460026/download.csv?data-type=dataset") %>% 
   rename(latitude = `_equip_location_latitude`,
          longitude = `_equip_location_longitude`,
          submission_time = "_submission_time",
@@ -269,7 +261,7 @@ equip_info <- read_csv(file = "https://ona.io/pacafenet/99874/460026/download.cs
          submission_date = ymd(str_sub(string = submission_time, start = 1, end = 10))) %>% 
   distinct(equip_id, .keep_all = T)
 
-activity_info <- read_csv(file = "https://ona.io/pacafenet/99874/460087/download.csv?data-type=dataset") %>%  # Equipment Activity Form
+activity_info <- read_csv(file = "https://ona.io/pacafenet/99874/460087/download.csv?data-type=dataset") %>%  
   rename(submission_time = "_submission_time",
          submitted_by = "_submitted_by",
          equip_id = "Equipment_ID") %>% 
@@ -387,16 +379,16 @@ curr_data_activity_req <- full_join(x = calib_req_info, y = maintenance_req_info
 
 ui <- dashboardPage(
   
-  dashboardHeader(title = "Equipment Maintenance Tracking Inventory",
-                  titleWidth = 750),
+  dashboardHeader(title = "Equipment Maintenance Tracking",
+                  titleWidth = 500),
   
   dashboardSidebar(width = 300,
                    
                    sidebarMenu(id = "tabs",
                      
-                     h4("Report View"),  # May decide to get rid of this, or could change the look up a bit 
+                     h4("Report View"),  
                      
-                     menuItem(text = "Equipment Report Overview",  # The one I'm currently working on, use curr_data_activity_req
+                     menuItem(text = "Equipment Report Overview", 
                               tabName = "overview_info",
                               icon = icon("chart-line")),
                      
@@ -418,40 +410,39 @@ ui <- dashboardPage(
       
       tabItem(tabName = "overview_info",
               
-              # h4("Test Page 1")
-              
-              # fluidRow(),  # UI - going to go without to start
-              
-              fluidRow(  # Consider adding offsets
+              fluidRow( 
                 
                 valueBoxOutput(outputId = "kpi_pieces_active_equip",
-                               width = 2),  # Adjust if necessary
+                               width = 2), 
                 
                 valueBoxOutput(outputId = "kpi_pieces_need_attention",
                                width = 2),  
                 
-                valueBoxOutput(outputId = "kpi_total_requests",  # req_info_hist
+                valueBoxOutput(outputId = "kpi_total_requests", 
                                width = 2),
                 
-                valueBoxOutput(outputId = "kpi_total_outstanding_requests",  # Need to join current data with req_info_hist
+                valueBoxOutput(outputId = "kpi_total_outstanding_requests", 
                                width = 2),
                 
                 valueBoxOutput(outputId = "kpi_requests_answered",
                                width = 2)
-                
-              ),  # Boxes/KIP's
+              ),  
               
-              fluidRow(tabBox(title = strong("Equipment Requiring Attention by Category"),  # May want to move the title for these boxes
+              fluidRow(tabBox(title = strong("Equipment Requiring Attention by Category"),  
                               id = "attention_tabset",
+                              
                               tabPanel(title = "Lab Count",
-                                       gt_output("equip_by_lab_table")),
+                                       plotlyOutput("equip_by_lab_bar")),
+                              
                               tabPanel(title = "Lab Pct",
-                                       gt_output("equip_by_lab_pct_table")),
+                                       plotlyOutput("equip_by_lab_pct_bar")),
+                              
                               tabPanel(title = "Attention Category",
-                                       gt_output("equip_by_attention_category_table")),
+                                       plotlyOutput("equip_by_attention_category_bar")),
+                              
                               tabPanel(title = "Lab Level",
-                                       gt_output("equip_attention_by_level"))
-              ))  # Graphs
+                                       plotlyOutput("equip_attention_level_bar"))
+              ))
               
               ),
       
@@ -485,15 +476,19 @@ ui <- dashboardPage(
                                                   `live-search` = T))
                 )
               ),
+              
               fluidRow(gt_output("equip_details_table")),
               
               fluidRow(downloadButton(outputId = "download_equip_details",
-                                      label = "Download Data"))
+                                      label = "Download Data")),
+              
+              fluidRow(h3(a("Enter Equipment Information", href = "https://enketo.ona.io/x/#xsR3wR1v")))
+              
               ),  
       
       tabItem(tabName = "equip_activity_details", 
               
-              fluidRow(  # Here, need to figure out row layout
+              fluidRow(  
                 column(width = 3,
                        pickerInput(inputId = "equipment_id_hist",
                                    label = "Choose Equipment ID(s):",
@@ -581,10 +576,14 @@ ui <- dashboardPage(
                                              `live-search` = T))
                 )
               ),
+              
               fluidRow(gt_output("equip_activity_hist_table")),
 
               fluidRow(downloadButton(outputId = "download_equip_activity_hist_details",
-                                      label = "Download Data"))
+                                      label = "Download Data")),
+              
+              fluidRow(h3(a("Enter Activity Information", href = "https://enketo.ona.io/x/#JBXgIyIf")))
+              
               ),
       
       tabItem(tabName = "equip_activity_requests",  
@@ -628,7 +627,12 @@ ui <- dashboardPage(
               fluidRow(gt_output("equip_req_table")),
               
               fluidRow(downloadButton(outputId = "download_equip_req_details",
-                                      label = "Download Data"))
+                                      label = "Download Data")),
+              
+              fluidRow(h3(a("Request Calibration", href = "https://enketo.ona.io/x/#VI2FevM7"))),
+              
+              fluidRow(h3(a("Request Maintenance", href = "https://enketo.ona.io/x/#OPkgR4Hc")))
+              
               )
     )
   )
@@ -657,7 +661,9 @@ server <- function(input, output, session) {
                                next_expected_calibration,
                                next_expected_maintenance,
                                activity_required_calib,
-                               activity_required_maint)) %>%  
+                               activity_required_maint,
+                               submission_date_calib,
+                               submission_date_maint)) %>%  
       cols_move(columns = vars(ownership_type),
                 after = vars(lab_level)) %>%  
       cols_move(columns = vars(retirement_flag),
@@ -675,7 +681,10 @@ server <- function(input, output, session) {
                  calib_engineer_post = "Calibration Engineer Post", 
                  maintenance_engineer_nm = "Maintenance Engineer Name",
                  maintenance_engineer_post = "Maintenance Engineer Post",
-                 retirement_flag = "Retirement Flag") %>%
+                 retirement_flag = "Retirement Flag",
+                 submission_date = "Last Updated") %>%
+      fmt_missing(columns = everything(),
+                  missing_text = "") %>% 
       cols_width(vars(date_active) ~ px(100),
                  vars(equip_id) ~ px(80),
                  vars(manufacturer) ~ px(125)) %>% 
@@ -697,7 +706,6 @@ server <- function(input, output, session) {
                   table.border.top.color = "black",
                   table_body.border.bottom.color = "black",
                   table.width = "80%")
-    
   })
   
   output$download_equip_details <- downloadHandler(
@@ -952,7 +960,6 @@ server <- function(input, output, session) {
                   table.border.top.color = "black",
                   table_body.border.bottom.color = "black",
                   table.width = "80%")
-
   })
 
   output$download_equip_req_details <- downloadHandler(
@@ -1015,7 +1022,6 @@ server <- function(input, output, session) {
                                  filter(retirement_flag == "No")%>% 
                                  nrow(), 
                                big.mark = ","),
-             
              subtitle = "Active Pieces of Equipment")
   )
   
@@ -1025,54 +1031,156 @@ server <- function(input, output, session) {
                                           (activity_required_calib == "Yes" | activity_required_maint == "Yes")) %>% 
                                  nrow(), 
                                big.mark = ","),
-             
-             subtitle = "Equipment Needing Immediate Attention")
+             subtitle = "Immediate Acivity Needed")
   )
   
   output$kpi_total_requests <- renderValueBox(  # req_info_hist
     valueBox(value = prettyNum(tt <- req_info_hist %>% 
                                  nrow(),
                                big.mark = ","),
-
              subtitle = "Number of Requests Made")
   )
-
-  # output$kpi_total_outstanding_requests <- renderValueBox(  # Current data?? Or just requests? This might be the toughest to do. 
-  #   valueBox(value = ,
-  #            
-  #            subtitle = )
-  # )
-  # 
-  # output$kpi_requests_answered <- renderValueBox(  # Historical data
-  #   valueBox(value = ,
-  #            
-  #            subtitle = )
-  # )
-  # 
-  # output$equip_by_lab_table <- render_gt({  # Current data
-  #   
-  #   
-  #   
-  # })
-  # 
-  # output$equip_by_lab_pct_table <- render_gt({  # Current data
-  #   
-  #   
-  #   
-  # })
-  # 
-  # output$equip_by_attention_category_table <- render_gt({  # Current data
-  #   
-  #   
-  #   
-  # })
-  # 
-  # output$equip_attention_by_level <- render_gt({  # Current data
-  #   
-  #   
-  #   
-  # })
   
+  output$kpi_total_outstanding_requests <- renderValueBox(  
+    valueBox(value = prettyNum(tt <- left_join(x = req_info_hist, y = curr_data_activity_req, by = "equip_id", suffix = c("_req", "_curr")) %>% 
+                                 mutate(outstanding_req = if_else(condition = (calibration_request_date_req > calibration_request_date_curr &
+                                                                                 !is.na(calibration_request_date_req) &
+                                                                                 retirement_flag != "Yes") |
+                                                                    (maintenance_request_date_req > maintenance_request_date_curr &
+                                                                       !is.na(maintenance_request_date_req) &
+                                                                       retirement_flag != "Yes"),
+                                                                  true = "Yes",
+                                                                  false = "No")) %>% 
+                                 filter(outstanding_req == "Yes") %>% 
+                                 nrow(),
+                               big.mark = ","),
+             subtitle = "Number Outstanding Requests")
+  )
+  
+  output$kpi_requests_answered <- renderValueBox(  
+    valueBox(value = prettyNum(tt <- left_join(x = req_info_hist, y = curr_data_activity_req, by = "equip_id", suffix = c("_req", "_curr")) %>% 
+                                 mutate(outstanding_req = if_else(condition = (calibration_request_date_req > calibration_request_date_curr &
+                                                                                 !is.na(calibration_request_date_req) &
+                                                                                 retirement_flag != "Yes") |
+                                                                    (maintenance_request_date_req > maintenance_request_date_curr &
+                                                                       !is.na(maintenance_request_date_req) &
+                                                                       retirement_flag != "Yes"),
+                                                                  true = "Yes",
+                                                                  false = "No")) %>% 
+                                 filter(outstanding_req == "No") %>% 
+                                 nrow(),
+                               big.mark = ","),
+             subtitle = "Number of Requests Answered")
+  )
+
+  output$equip_by_lab_bar <- renderPlotly({ 
+    
+    tt <- curr_data_activity_req %>% 
+      filter(retirement_flag != "Yes") %>%
+      mutate(requires_attn = if_else(condition = activity_required_calib == "Yes" | activity_required_maint == "Yes",
+                                     true = "Yes",
+                                     false = "No")) %>%
+      group_by(facility, requires_attn) %>%  
+      tally() %>% 
+      pivot_wider(names_from = requires_attn, values_from = n, values_fill = list(n = 0))
+    
+    tt2 <- tt %>% 
+      ggplot(aes(x = facility, weight = Yes)) +  
+      geom_bar(fill = "white", color = "black") +
+      coord_flip() +
+      theme_classic() + 
+      xlab("Facility") + 
+      scale_y_continuous(name = "Number of Labs",
+                         limits = c(0, sum(tt$Yes, na.rm = T)),
+                         breaks = seq(0, sum(tt$Yes, na.rm = T), 1)) +
+      theme(legend.position = "none",
+            axis.text.x = element_text(face = "bold"),
+            axis.text.y = element_text(face = "bold"),
+            axis.title = element_text(face = "bold"),
+            axis.text = element_text(color = "Black"))
+  })
+
+  output$equip_by_lab_pct_bar <- renderPlotly({  
+    
+    tt <- curr_data_activity_req %>%
+      filter(retirement_flag != "Yes") %>%
+      mutate(requires_attn = if_else(condition = activity_required_calib == "Yes" | activity_required_maint == "Yes",
+                                     true = "Yes",
+                                     false = "No")) %>%
+      group_by(facility, requires_attn) %>%  # Changes
+      tally() %>% 
+      pivot_wider(names_from = requires_attn, values_from = n, values_fill = list(n = 0)) %>% 
+      mutate(pct_yes = round((Yes/(No + Yes)) * 100, digits = 2))
+
+    tt2 <- tt %>%
+      ggplot(aes(x = facility, weight = pct_yes)) +  # Changes
+      geom_bar(fill = "white", color = "black") +
+      coord_flip() +
+      theme_classic() +
+      xlab("Facility") +  # Changes
+      scale_y_continuous(name = "% Equipment Requiring Attention",  # Changes
+                         limits = c(0, 100),
+                         breaks = seq(0, 100, 5)) +
+      theme(legend.position = "none",
+            axis.text.x = element_text(face = "bold"),
+            axis.text.y = element_text(face = "bold"),
+            axis.title = element_text(face = "bold"),
+            axis.text = element_text(color = "Black"))
+  })
+
+  output$equip_by_attention_category_bar <- renderPlotly({  
+
+    tt <- curr_data_activity_req %>% 
+      filter(retirement_flag != "Yes") %>%
+      mutate(requires_attn = if_else(condition = activity_required_calib == "Yes" | activity_required_maint == "Yes",
+                                     true = "Yes",
+                                     false = "No")) %>% 
+      group_by(requires_attn) %>%  
+      tally() 
+
+    tt2 <- tt %>% 
+      ggplot(aes(x = requires_attn, weight = n)) +
+      geom_bar(fill = "white", color = "black") +
+      coord_flip() +
+      theme_classic() + 
+      xlab("Requires Attention") + 
+      scale_y_continuous(name = "Count",
+                         limits = c(0, sum(tt$n, na.rm = T)),
+                         breaks = seq(0, sum(tt$n, na.rm = T), 1)) +
+      theme(legend.position = "none",
+            axis.text.x = element_text(face = "bold"),
+            axis.text.y = element_text(face = "bold"),
+            axis.title = element_text(face = "bold"),
+            axis.text = element_text(color = "Black"))
+
+  })
+
+  output$equip_attention_level_bar <- renderPlotly({  # Current data
+
+    tt <- curr_data_activity_req %>%
+      filter(retirement_flag != "Yes") %>%
+      mutate(requires_attn = if_else(condition = activity_required_calib == "Yes" | activity_required_maint == "Yes",
+                                     true = "Yes",
+                                     false = "No")) %>%
+      group_by(lab_level, requires_attn) %>%  
+      tally() %>% 
+      pivot_wider(names_from = requires_attn, values_from = n, values_fill = list(n = 0))
+
+    tt2 <- tt %>%
+      ggplot(aes(x = lab_level, weight = Yes)) + 
+      geom_bar(fill = "white", color = "black") +
+      coord_flip() +
+      theme_classic() +
+      xlab("Lab Level") +  
+      scale_y_continuous(name = "Count", 
+                         limits = c(0, sum(tt$Yes, na.rm = T)),
+                         breaks = seq(0, sum(tt$Yes, na.rm = T), 1)) +
+      theme(legend.position = "none",
+            axis.text.x = element_text(face = "bold"),
+            axis.text.y = element_text(face = "bold"),
+            axis.title = element_text(face = "bold"),
+            axis.text = element_text(color = "Black"))
+  })
 }
 
 shinyApp(ui = ui, server = server)
