@@ -7,6 +7,8 @@
 
 ### To ConsiderLater ###
 
+# Shouldn't take long, look at dashboard themese, and then consider the background colors. 
+
 # Change the layout, have to scroll down to view everything, see Rstudio layout guide. Might want to get rid
 # of sidebar or make other changes.
 
@@ -17,6 +19,9 @@
 # SOMETHING TO CONSIDER - might want to connect all the UI so the dropdowns are uniform and carry over bw tabs
 
 # Might want to add offsets to columns  for UI
+
+# May need to add logic in case there are multiple blanks since they are currently checked against the most
+# recent entry. 
 
 #######################
 
@@ -41,6 +46,7 @@ library(shinydashboard)
 library(dashboardthemes)
 library(shinyWidgets)
 library(plotly)
+library(dashboardthemes)
 
 ### Data pipeline
 
@@ -405,6 +411,12 @@ ui <- dashboardPage(
                               icon = icon("bullhorn"))
                    )),
   dashboardBody(
+    
+    theme_grey_light,
+
+    # theme_grey_dark,
+    
+    # theme_purple_gradient,
     
     tabItems(
       
