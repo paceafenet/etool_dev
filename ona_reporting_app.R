@@ -23,6 +23,9 @@
 # May need to add logic in case there are multiple blanks since they are currently checked against the most
 # recent entry. 
 
+# Consider making some of the fields optional in the forms. Some things especially for new equipment might not be 
+# known. 
+
 #######################
 
 #########################################################################################################
@@ -414,10 +417,6 @@ ui <- dashboardPage(
     
     theme_grey_light,
 
-    # theme_grey_dark,
-    
-    # theme_purple_gradient,
-    
     tabItems(
       
       tabItem(tabName = "overview_info",
@@ -460,7 +459,16 @@ ui <- dashboardPage(
       
       tabItem(tabName = "equip_details",
               fluidRow(  
-                column(width = 4,
+                column(width = 3,
+                       pickerInput(inputId = "equipment_id",
+                                   label = "Choose Equipment ID(s):",
+                                   choices = sort(unique(curr_data_activity_req$equip_id)),
+                                   selected = sort(unique(curr_data_activity_req$equip_id)),
+                                   multiple = T,
+                                   options = list(`actions-box` = T,
+                                                  `live-search` = T))
+                       ),
+                column(width = 3,
                   pickerInput(inputId = "equipment_type",
                               label = "Choose Equipment Type(s):",
                               choices = sort(unique(curr_data_activity_req$equip_type)),
@@ -469,7 +477,7 @@ ui <- dashboardPage(
                               options = list(`actions-box` = T,
                                              `live-search` = T))
                 ),
-                column(width = 4,
+                column(width = 3,
                        pickerInput(inputId = "facility",
                                    label = "Choose Facilitie(s):",
                                    choices = sort(unique(curr_data_activity_req$facility)),
@@ -478,7 +486,7 @@ ui <- dashboardPage(
                                    options = list(`actions-box` = T,
                                                   `live-search` = T))
                 ),
-                column(width = 4,
+                column(width = 3,
                        pickerInput(inputId = "submitted_by",
                                    label = "Choose Survey Respondent(s):",
                                    choices = sort(unique(curr_data_activity_req$submitted_by)),
@@ -489,10 +497,10 @@ ui <- dashboardPage(
                 )
               ),
               
-              fluidRow(gt_output("equip_details_table")),
-              
               fluidRow(downloadButton(outputId = "download_equip_details",
                                       label = "Download Data")),
+              
+              fluidRow(gt_output("equip_details_table")),
               
               fluidRow(h3(a("Enter Equipment Information", href = "https://enketo.ona.io/x/#xsR3wR1v")))
               
@@ -537,6 +545,7 @@ ui <- dashboardPage(
                                                   `live-search` = T))
                 )
               ), 
+              
               fluidRow(
                 column(width = 2,
                   dateRangeInput(inputId = "dt_submitted_hist",
@@ -589,11 +598,11 @@ ui <- dashboardPage(
                 )
               ),
               
-              fluidRow(gt_output("equip_activity_hist_table")),
-
               fluidRow(downloadButton(outputId = "download_equip_activity_hist_details",
                                       label = "Download Data")),
               
+              fluidRow(gt_output("equip_activity_hist_table")),
+
               fluidRow(h3(a("Enter Activity Information", href = "https://enketo.ona.io/x/#JBXgIyIf")))
               
               ),
@@ -636,10 +645,11 @@ ui <- dashboardPage(
                                       max = max(curr_data_activity_req$maintenance_request_date, na.rm = T))
                 )
               ),
-              fluidRow(gt_output("equip_req_table")),
               
               fluidRow(downloadButton(outputId = "download_equip_req_details",
                                       label = "Download Data")),
+              
+              fluidRow(gt_output("equip_req_table")),
               
               fluidRow(h3(a("Request Calibration", href = "https://enketo.ona.io/x/#VI2FevM7"))),
               
@@ -655,7 +665,8 @@ server <- function(input, output, session) {
   output$equip_details_table <- render_gt({
     
     tt <- curr_data_activity_req %>%   
-      filter(equip_type %in% c(input$equipment_type) &
+      filter(equip_id %in% c(input$equipment_id) &
+               equip_type %in% c(input$equipment_type) &
                facility %in% c(input$facility) &
                submitted_by %in% c(input$submitted_by)) %>%
       gt() %>% 
@@ -822,8 +833,8 @@ server <- function(input, output, session) {
                  vars(lab_level) ~ px(80),
                  vars(calib_engineer_nm) ~ px(80),
                  vars(calib_engineer_post) ~ px(80),
-                 vars(maintenance_engineer_nm) ~ px(90),
-                 vars(maintenance_engineer_post) ~ px(90),
+                 vars(maintenance_engineer_nm) ~ px(100),
+                 vars(maintenance_engineer_post) ~ px(100),
                  vars(retirement_flag) ~ 90) %>%
       tab_style(style = list(cell_fill(color = "white"),
                              cell_text(color = "red")),
