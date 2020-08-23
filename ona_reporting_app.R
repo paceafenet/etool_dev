@@ -5,7 +5,7 @@
 # Made some pretty minor edits, be sure to push code to shinyapps whenever I'm actually reviewing progress
 # with the Africa folks. 
 
-### To ConsiderLater ###
+### To Consider Later ###
 
 # Shouldn't take long, look at dashboard themese, and then consider the background colors. 
 
