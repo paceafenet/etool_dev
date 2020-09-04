@@ -7,7 +7,7 @@
 
 ### To Consider Later ###
 
-# Shouldn't take long, look at dashboard themese, and then consider the background colors. 
+# Shouldn't take long, look at dashboard themes, and then consider the background colors. Remember there is a themepicker function, try that
 
 # Change the layout, have to scroll down to view everything, see Rstudio layout guide. Might want to get rid
 # of sidebar or make other changes.
@@ -25,6 +25,8 @@
 
 # Consider making some of the fields optional in the forms. Some things especially for new equipment might not be 
 # known. 
+
+# Add email context. 
 
 #######################
 
@@ -65,6 +67,7 @@ equip_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/460026/
   select(1:15, 17:18, 24, 29) %>% 
   arrange(equip_id, desc(submission_time)) %>%  
   group_by(equip_id) %>% 
+  # These if else's seem to account for when things are left blank, good idea, think all are required right now
   mutate(equip_type = if_else(condition = is.na(equip_type),
                               true = lead(equip_type),
                               false = equip_type),
@@ -439,23 +442,24 @@ ui <- dashboardPage(
                                width = 2)
               ),  
               
-              fluidRow(tabBox(title = strong("Equipment Requiring Attention by Category"),  
-                              id = "attention_tabset",
-                              
-                              tabPanel(title = "Lab Count",
-                                       plotlyOutput("equip_by_lab_bar")),
-                              
-                              tabPanel(title = "Lab Pct",
-                                       plotlyOutput("equip_by_lab_pct_bar")),
-                              
-                              tabPanel(title = "Attention Category",
-                                       plotlyOutput("equip_by_attention_category_bar")),
-                              
-                              tabPanel(title = "Lab Level",
-                                       plotlyOutput("equip_attention_level_bar"))
-              ))
-              
-              ),
+              fluidRow(
+                tabBox(title = strong("Equipment Requiring Attention by Category"),  
+                       id = "attention_tabset",
+                       
+                       tabPanel(title = "Lab Count",
+                                plotlyOutput("equip_by_lab_bar")),
+                       
+                       tabPanel(title = "Lab Pct",
+                                plotlyOutput("equip_by_lab_pct_bar")),
+                       
+                       tabPanel(title = "Attention Category",
+                                plotlyOutput("equip_by_attention_category_bar")),
+                       
+                       tabPanel(title = "Lab Level",
+                                plotlyOutput("equip_attention_level_bar"))
+                )
+              )
+      ),
       
       tabItem(tabName = "equip_details",
               fluidRow(  
