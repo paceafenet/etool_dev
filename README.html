@@ -7,6 +7,7 @@
 <meta charset="utf-8" />
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
 
 
@@ -254,9 +255,7 @@ h6 {
 </style>
 
 
-</head>
 
-<body>
 
 <style type="text/css">
 .main-container {
@@ -270,7 +269,6 @@ code {
 }
 img {
   max-width:100%;
-  height: auto;
 }
 .tabbed-pane {
   padding-top: 12px;
@@ -281,22 +279,80 @@ img {
 button.code-folding-btn:focus {
   outline: none;
 }
+summary {
+  display: list-item;
+}
 </style>
 
 
 
-<div class="container-fluid main-container">
-
 <!-- tabsets -->
-<script>
-$(document).ready(function () {
-  window.buildTabsets("TOC");
-});
-</script>
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "";
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
 
 <!-- code folding -->
 
 
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
 
 
 
@@ -314,12 +370,12 @@ $(document).ready(function () {
 <p>On this page you will find all related code and associated files related to developing the inventory tracking eTool.</p>
 <p>Below are several-related links</p>
 <ol style="list-style-type: decimal">
-<li><a href="https://paceafenet.github.io/progress_reports/">Weekly Progress Reports</a>, or click here for the <a href="https://github.com/paceafenet/progress_reports/blob/master/Current%20Progress%20Report.pdf">PDF Version</a></li>
+<li><a href="https://github.com/paceafenet/progress_reports/blob/master/Current%20Progress%20Report.pdf">Weekly Progress Reports</a></li>
 <li><a href="https://paceafenet.github.io/final_report/">Project Final Report</a></li>
 <li><a href="https://github.com/paceafenet/etool_dev/blob/master/existing_lab_data_exploration.md">Report Describing Existing Data</a></li>
 <li><a href="https://travis-shinin-spot.shinyapps.io/etool_dev/">Demo eTool</a></li>
 <li><a href="https://github.com/paceafenet/etool_dev/blob/master/eTool%20Functionality%20Outline.pdf">eTool Outline</a>, click download to download a pdf copy</li>
-<li><a href="https://github.com/paceafenet/etool_dev/blob/master/Technical%20Documentation%20-%20eTool.pdf">eTool Technical Documentation</a></li>
+<li><a href="https://github.com/paceafenet/etool_dev/blob/master/Technical%20Documentation%20-%20eTool.pdf">eTool Technical Documentation</a>, , click download to download a pdf copy</li>
 <li><a href="https://travis-shinin-spot.shinyapps.io/new_equip_form/">New Equipment Form</a> - use this form to enter data on newly introduced equipment.</li>
 <li><a href="https://github.com/paceafenet/etool_dev/blob/master/New%20Equipment%20Form%20User%20Guide.pdf">Add New Equipment Form User Guide</a></li>
 <li><a href="https://rstudio.cloud/project/255745">Project RStudio Cloud Account</a> - setup demo lessons for reference, can sign up with either Google or GitHub, can also use any email service</li>
@@ -343,6 +399,23 @@ $(document).ready(function () {
 
 
 </script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open')
+  });
+});
+</script>
+
+<!-- code folding -->
+
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
 <script>
