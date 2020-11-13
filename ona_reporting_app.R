@@ -2,31 +2,11 @@
 ###########################################################################################################
 # Notes #
 
-# Made some pretty minor edits, be sure to push code to shinyapps whenever I'm actually reviewing progress
-# with the Africa folks. 
+# May be worth fixing the joins now with activity - since I can figure out how to build in the logic for
+# notifiations
 
-### To Consider Later ###
-
-# Shouldn't take long, look at dashboard themes, and then consider the background colors. Remember there is a themepicker function, try that
-
-# Change the layout, have to scroll down to view everything, see Rstudio layout guide. Might want to get rid
-# of sidebar or make other changes.
-
-# Do I want to have warnings? Yellow rather than just red? Color based on how long requests open? 
-
-# Consider changing this, there are some pretty flexible layouts possible. May even want to get rid of the sidebar.
-
-# SOMETHING TO CONSIDER - might want to connect all the UI so the dropdowns are uniform and carry over bw tabs
-
-# Might want to add offsets to columns  for UI
-
-# May need to add logic in case there are multiple blanks since they are currently checked against the most
-# recent entry. 
-
-# Consider making some of the fields optional in the forms. Some things especially for new equipment might not be 
-# known. 
-
-# Add email context. 
+# Add email context to allow for notifications. 
+  # Logic starts at line 
 
 #######################
 
@@ -59,108 +39,147 @@ library(dashboardthemes)
 
 # Historical Data #
 
-equip_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/460026/download.csv?data-type=dataset") %>%  
+  # New Equipment Registration Form
+
+equip_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/460026/download.csv?data-type=dataset",
+                                  na = c("n/a", "")) %>%  
   rename(latitude = `_equip_location_latitude`,
          longitude = `_equip_location_longitude`,
          submission_time = "_submission_time",
          submitted_by = "_submitted_by") %>% 
-  select(1:15, 17:18, 24, 29) %>% 
+  rename_all(~gsub(pattern = "-", replacement = "_", x = .)) %>% 
+  filter(submitted_by != "pacafenet" |
+           is.na(submitted_by)) %>% 
+  select(equip_id, manufacturer, facility, equip_type, equip_type_other, lab_level, lab_level_is_other, ownership_type, ownership_type_is_other,
+         waranty_status, equipment_status, equipment_purchase_status, manual_availability, manufacture_date, freq_service_maintenance, freq_calibration,
+         date_active, engineering_service_provider, engineering_service_provider_email_address, most_recent_calibration, most_recent_maintenance,
+         latitude, longitude, submitted_by, submission_time) %>% 
   arrange(equip_id, desc(submission_time)) %>%  
   group_by(equip_id) %>% 
   # These if else's seem to account for when things are left blank, good idea, think all are required right now
-  mutate(equip_type = if_else(condition = is.na(equip_type),
-                              true = lead(equip_type),
-                              false = equip_type),
-         manufacturer = if_else(condition = is.na(manufacturer),
+  mutate(manufacturer = if_else(condition = is.na(manufacturer),
                                 true = lead(manufacturer),
                                 false = manufacturer),
-         manufacture_date = if_else(condition = is.na(manufacture_date),
-                                    true = lead(manufacture_date),
-                                    false = manufacture_date),
-         date_active = if_else(condition = is.na(date_active),
-                               true = lead(date_active),
-                               false = date_active),
          facility = if_else(condition = is.na(facility),
                             true = lead(facility),
                             false = facility),
-         ownership_type = if_else(condition = is.na(ownership_type),
-                                  true = lead(ownership_type),
-                                  false = ownership_type),
+         equip_type = if_else(condition = is.na(equip_type),
+                              true = lead(equip_type),
+                              false = equip_type),
+         equip_type_other = if_else(condition = is.na(equip_type_other),
+                                    true = lead(equip_type_other),
+                                    false = equip_type_other),
          lab_level = if_else(condition = is.na(lab_level),
                              true = lead(lab_level),
                              false = lab_level),
          lab_level_is_other = if_else(condition = is.na(lab_level_is_other),
                                       true = lead(lab_level_is_other),
                                       false = lab_level_is_other),
-         calib_engineer_nm = if_else(condition = is.na(calib_engineer_nm),
-                                     true = lead(calib_engineer_nm),
-                                     false = calib_engineer_nm),
-         calib_engineer_post = if_else(condition = is.na(calib_engineer_post),
-                                       true = lead(calib_engineer_post),
-                                       false = calib_engineer_post),
+         ownership_type = if_else(condition = is.na(ownership_type),
+                                  true = lead(ownership_type),
+                                  false = ownership_type),
+         ownership_type_is_other = if_else(condition = is.na(ownership_type_is_other),
+                                           true = lead(ownership_type_is_other),
+                                           false = ownership_type_is_other),
+         waranty_status = if_else(condition = is.na(waranty_status),
+                                  true = lead(waranty_status),
+                                  false = waranty_status),
+         equipment_status = if_else(condition = is.na(equipment_status),
+                                    true = lead(equipment_status),
+                                    false = equipment_status),
+         equipment_purchase_status = if_else(condition = is.na(equipment_purchase_status),
+                                             true = lead(equipment_purchase_status),
+                                             false = equipment_purchase_status),
+         manual_availability = if_else(condition = is.na(manual_availability),
+                                       true = lead(manual_availability),
+                                       false = manual_availability),
+         manufacture_date = if_else(condition = is.na(manufacture_date),
+                                    true = lead(manufacture_date),
+                                    false = manufacture_date),
+         freq_service_maintenance = if_else(condition = is.na(freq_service_maintenance),
+                                            true = lead(freq_service_maintenance),
+                                            false = freq_service_maintenance),
+         freq_calibration = if_else(condition = is.na(freq_calibration),
+                                    true = lead(freq_calibration),
+                                    false = freq_calibration),
+         date_active = if_else(condition = is.na(date_active),
+                               true = lead(date_active),
+                               false = date_active),
+         engineering_service_provider = if_else(condition = is.na(engineering_service_provider),
+                                                true = lead(engineering_service_provider),
+                                                false = engineering_service_provider),
+         engineering_service_provider_email_address = if_else(condition = is.na(engineering_service_provider_email_address),
+                                                              true = lead(engineering_service_provider_email_address),
+                                                              false = engineering_service_provider_email_address),
          most_recent_calibration = if_else(condition = is.na(most_recent_calibration),
                                            true = lead(most_recent_calibration),
                                            false = most_recent_calibration),
          most_recent_maintenance = if_else(condition = is.na(most_recent_maintenance),
                                            true = lead(most_recent_maintenance),
                                            false = most_recent_maintenance),
-         maintenance_engineer_nm = if_else(condition = is.na(maintenance_engineer_nm),
-                                           true = lead(maintenance_engineer_nm),
-                                           false = maintenance_engineer_nm),
-         maintenance_engineer_post = if_else(condition = is.na(maintenance_engineer_post),
-                                             true = lead(maintenance_engineer_post),
-                                             false = maintenance_engineer_post),
          latitude = if_else(condition = is.na(latitude),
                             true = lead(latitude),
                             false = latitude),
          longitude = if_else(condition = is.na(longitude),
                              true = lead(longitude),
-                             false = longitude)) 
+                             false = longitude),
+         submitted_by = if_else(condition = is.na(submitted_by),
+                                true = lead(submitted_by),
+                                false = submitted_by),
+         equip_id = as.character(equip_id))
 
-activity_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/460087/download.csv?data-type=dataset") %>%  
+# Activity form - still based on just fake data, so no changes made as of yet - FIX LATER
+
+activity_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/460087/download.csv?data-type=dataset",
+                                     na = c("n/a", "")) %>%  
   rename(submission_time = "_submission_time",
-         submitted_by = "_submitted_by",
-         equip_id = "Equipment_ID") %>% 
-  select(1:8, 12, 17) %>% 
-  arrange(equip_id, desc(submission_time)) %>%
-  group_by(equip_id) %>% 
-  mutate(calib_engineer_nm = if_else(condition = is.na(calib_engineer_nm),
-                                     true = lead(calib_engineer_nm, n = 1),
-                                     false = calib_engineer_nm),
-         calib_engineer_post = if_else(condition = is.na(calib_engineer_post),
-                                       true = lead(calib_engineer_post, n = 1),
-                                       false = calib_engineer_post),
+         submitted_by = "_submitted_by") %>% 
+  rename_all(~gsub(pattern = "-", replacement = "_", x = .)) %>% 
+  rename_all(~tolower(.)) %>% 
+  select(equipment_id, engineering_service_provider, most_recent_calibration, most_recent_maintenance, retirement_flag, submission_time, 
+         submitted_by) %>% 
+  arrange(equipment_id, desc(submission_time)) %>%
+  group_by(equipment_id) %>% 
+  mutate(engineering_service_provider = if_else(condition = is.na(engineering_service_provider),
+                                                true = lead(engineering_service_provider, n = 1),
+                                                false = engineering_service_provider),
          most_recent_calibration = if_else(condition = is.na(most_recent_calibration),  
                                            true = lead(most_recent_calibration, n = 1),
                                            false = most_recent_calibration),
-         maintenance_engineer_nm = if_else(condition = is.na(maintenance_engineer_nm),  
-                                           true = lead(maintenance_engineer_nm, n = 1),
-                                           false = maintenance_engineer_nm),
-         maintenance_engineer_post = if_else(condition = is.na(maintenance_engineer_post),  
-                                             true = lead(maintenance_engineer_post, n = 1),
-                                             false = maintenance_engineer_post),
          most_recent_maintenance = if_else(condition = is.na(most_recent_maintenance),  
                                            true = lead(most_recent_maintenance, n = 1),
                                            false = most_recent_maintenance),
          retirement_flag = if_else(condition = is.na(retirement_flag),  
                                    true = lead(retirement_flag, n = 1),
-                                   false = retirement_flag)) 
+                                   false = retirement_flag)) %>% 
+  ungroup() %>% 
+  mutate(equipment_id = as.character(equipment_id)) # In for now - likely won't need with real data, same with ^^ line
 
-calib_req_info_hist <- read_csv(file = "https://ona.io/pacafenet/99874/461478/download.csv?data-type=dataset") %>%
+# Request Calibration - still based on just fake data, so no changes made yet - FIX LATER
+
+calib_req_info_hist <- read_csv(file = "https://ona.io/pacafenet/99874/461478/download.csv?data-type=dataset",
+                                na = c("n/a", "")) %>%
   rename(submission_time = "_submission_time",
          submitted_by = "_submitted_by",
          equip_id = "Equipment_ID") %>%
   mutate(submission_date = ymd(str_sub(string = submission_time, start = 1, end = 10))) %>%
   select(1:2, 6, 11, 16) %>%
+  mutate(equip_id = as.character(equip_id)) %>%  # In for now - likely won't need with real data
   arrange(equip_id, desc(submission_time))
 
-maintenance_req_info_hist <- read_csv(file = "https://ona.io/pacafenet/99874/461477/download.csv?data-type=dataset") %>%
+# Request Maintenance - still based on just fake data, so no changes made yet - FIX LATER
+
+maintenance_req_info_hist <- read_csv(file = "https://ona.io/pacafenet/99874/461477/download.csv?data-type=dataset",
+                                      na = c("n/a", "")) %>%
   rename(submission_time = "_submission_time",
          submitted_by = "_submitted_by",
          equip_id = "Equipment_ID") %>%
   mutate(submission_date = ymd(str_sub(string = submission_time, start = 1, end = 10))) %>%
   select(1:2, 6, 11, 16) %>%
+  mutate(equip_id = as.character(equip_id)) %>%  # In for now - likely won't need with real data
   arrange(equip_id, desc(submission_time))
+
+# Joining Historical request info together
 
 req_info_hist <- full_join(x = calib_req_info_hist, y = maintenance_req_info_hist, by = "equip_id", suffix = c("_calib", "_maint")) %>% 
   mutate(submitted_by = if_else(condition = is.na(submitted_by_calib),
@@ -168,31 +187,29 @@ req_info_hist <- full_join(x = calib_req_info_hist, y = maintenance_req_info_his
                                 false = submitted_by_calib)) %>% 
   select(-submitted_by_calib, -submitted_by_maint)
 
-historical_data <- left_join(x = equip_info_historical, y = activity_info_historical, by = "equip_id", suffix = c(".info",".activity")) %>% 
-  mutate(calib_engineer_nm = if_else(condition = is.na(calib_engineer_nm.activity),  
-                                     true = calib_engineer_nm.info,
-                                     false = calib_engineer_nm.activity),
-         calib_engineer_post = if_else(condition = is.na(calib_engineer_post.activity),
-                                       true = calib_engineer_post.info,
-                                       false = calib_engineer_post.activity),
+# Joins equipment information to activity events
+  # still based on fake data, won't be anything added here as of yet. No Matches until requests come in. Change the activity form to match the 
+  # conventions in the newly designed form
+
+historical_data <- left_join(x = equip_info_historical, 
+                             y = activity_info_historical, 
+                             by = c("equip_id" = "equipment_id"), 
+                             suffix = c(".info",".activity")) %>% 
+  mutate(engineering_service_provider = if_else(condition = is.na(engineering_service_provider.activity),
+                                                true = engineering_service_provider.info,
+                                                false = engineering_service_provider.activity),
          most_recent_calibration = if_else(condition = is.na(most_recent_calibration.activity),
                                            true = most_recent_calibration.info,
                                            false = most_recent_calibration.activity),
          most_recent_maintenance = if_else(condition = is.na(most_recent_maintenance.activity),
                                            true = most_recent_maintenance.info,
                                            false = most_recent_maintenance.activity),
-         maintenance_engineer_nm = if_else(condition = is.na(maintenance_engineer_nm.activity),
-                                           true = maintenance_engineer_nm.info,
-                                           false = maintenance_engineer_nm.activity),
-         maintenance_engineer_post = if_else(condition = is.na(maintenance_engineer_post.activity),
-                                             true = maintenance_engineer_post.info,
-                                             false = maintenance_engineer_post.activity),
-         most_recent_maintenance = if_else(condition = is.na(most_recent_maintenance.activity),
-                                           true = most_recent_maintenance.info,
-                                           false = most_recent_maintenance.activity),
          submitted_by = if_else(condition = is.na(submitted_by.activity),
                                 true = submitted_by.info,
                                 false = submitted_by.activity),
+         submission_time = if_else(condition = is.na(submission_time.activity),
+                                   true = submission_time.info,
+                                   false = submission_time.activity),
          latitude = as.numeric(latitude),
          longitude = as.numeric(longitude),
          retirement_flag = if_else(condition = is.na(retirement_flag),
@@ -214,151 +231,77 @@ historical_data <- left_join(x = equip_info_historical, y = activity_info_histor
 
 # Current State #
 
-equip_info <- read_csv(file = "https://ona.io/pacafenet/99874/460026/download.csv?data-type=dataset") %>% 
-  rename(latitude = `_equip_location_latitude`,
-         longitude = `_equip_location_longitude`,
-         submission_time = "_submission_time",
-         submitted_by = "_submitted_by") %>% 
-  select(1:15, 17:18, 24, 29) %>% 
-  arrange(equip_id, desc(submission_time)) %>%  
-  group_by(equip_id) %>% 
-  mutate(equip_type = if_else(condition = is.na(equip_type),
-                              true = lead(equip_type),
-                              false = equip_type),
-         manufacturer = if_else(condition = is.na(manufacturer),
-                                true = lead(manufacturer),
-                                false = manufacturer),
-         manufacture_date = if_else(condition = is.na(manufacture_date),
-                                    true = lead(manufacture_date),
-                                    false = manufacture_date),
-         date_active = if_else(condition = is.na(date_active),
-                               true = lead(date_active),
-                               false = date_active),
-         facility = if_else(condition = is.na(facility),
-                            true = lead(facility),
-                            false = facility),
-         ownership_type = if_else(condition = is.na(ownership_type),
-                                  true = lead(ownership_type),
-                                  false = ownership_type),
-         lab_level = if_else(condition = is.na(lab_level),
-                             true = lead(lab_level),
-                             false = lab_level),
-         lab_level_is_other = if_else(condition = is.na(lab_level_is_other),
-                                      true = lead(lab_level_is_other),
-                                      false = lab_level_is_other),
-         calib_engineer_nm = if_else(condition = is.na(calib_engineer_nm),
-                                     true = lead(calib_engineer_nm),
-                                     false = calib_engineer_nm),
-         calib_engineer_post = if_else(condition = is.na(calib_engineer_post),
-                                       true = lead(calib_engineer_post),
-                                       false = calib_engineer_post),
-         most_recent_calibration = if_else(condition = is.na(most_recent_calibration),
-                                           true = lead(most_recent_calibration),
-                                           false = most_recent_calibration),
-         most_recent_maintenance = if_else(condition = is.na(most_recent_maintenance),
-                                           true = lead(most_recent_maintenance),
-                                           false = most_recent_maintenance),
-         maintenance_engineer_nm = if_else(condition = is.na(maintenance_engineer_nm),
-                                           true = lead(maintenance_engineer_nm),
-                                           false = maintenance_engineer_nm),
-         maintenance_engineer_post = if_else(condition = is.na(maintenance_engineer_post),
-                                             true = lead(maintenance_engineer_post),
-                                             false = maintenance_engineer_post),
-         latitude = if_else(condition = is.na(latitude),
-                            true = lead(latitude),
-                            false = latitude),
-         longitude = if_else(condition = is.na(longitude),
-                             true = lead(longitude),
-                             false = longitude),
-         submission_date = ymd(str_sub(string = submission_time, start = 1, end = 10))) %>% 
+# New Equipment Registration Form - pulling data for the current state
+
+equip_info <- equip_info_historical %>% 
+  arrange(equip_id, desc(submission_time)) %>% 
   distinct(equip_id, .keep_all = T)
 
-activity_info <- read_csv(file = "https://ona.io/pacafenet/99874/460087/download.csv?data-type=dataset") %>%  
-  rename(submission_time = "_submission_time",
-         submitted_by = "_submitted_by",
-         equip_id = "Equipment_ID") %>% 
-  select(1:8, 12, 17) %>% 
-  arrange(equip_id, desc(submission_time)) %>%
-  group_by(equip_id) %>% 
-  mutate(calib_engineer_nm = if_else(condition = is.na(calib_engineer_nm),
-                                     true = lead(calib_engineer_nm, n = 1),
-                                     false = calib_engineer_nm),
-         calib_engineer_post = if_else(condition = is.na(calib_engineer_post),
-                                       true = lead(calib_engineer_post, n = 1),
-                                       false = calib_engineer_post),
-         most_recent_calibration = if_else(condition = is.na(most_recent_calibration),  
-                                           true = lead(most_recent_calibration, n = 1),
-                                           false = most_recent_calibration),
-         maintenance_engineer_nm = if_else(condition = is.na(maintenance_engineer_nm),  
-                                           true = lead(maintenance_engineer_nm, n = 1),
-                                           false = maintenance_engineer_nm),
-         maintenance_engineer_post = if_else(condition = is.na(maintenance_engineer_post),  
-                                             true = lead(maintenance_engineer_post, n = 1),
-                                             false = maintenance_engineer_post),
-         most_recent_maintenance = if_else(condition = is.na(most_recent_maintenance),  
-                                           true = lead(most_recent_maintenance, n = 1),
-                                           false = most_recent_maintenance),
-         retirement_flag = if_else(condition = is.na(retirement_flag),  
-                                   true = lead(retirement_flag, n = 1),
-                                   false = retirement_flag),
-         submission_date = ymd(str_sub(string = submission_time, start = 1, end = 10))) %>% 
-  distinct(equip_id, .keep_all = T)
+# Activity form - still based on just fake data, so no changes made as of yet - FIX LATER
 
-curr_data <- left_join(x = equip_info, y = activity_info, by = "equip_id", suffix = c(".info",".activity")) %>% 
-  mutate(calib_engineer_nm = if_else(condition = is.na(calib_engineer_nm.activity),  
-                                     true = calib_engineer_nm.info,
-                                     false = calib_engineer_nm.activity),
-         calib_engineer_post = if_else(condition = is.na(calib_engineer_post.activity),
-                                       true = calib_engineer_post.info,
-                                       false = calib_engineer_post.activity),
+activity_info <- activity_info_historical %>% 
+  arrange(equipment_id, desc(submission_time)) %>% 
+  distinct(equipment_id, .keep_all = T)
+
+# Joins equipment information to activity events - FIX LATER
+# still based on fake data, won't be anything added here as of yet. No Matches until requests come in
+
+curr_data <- left_join(x = equip_info, 
+                       y = activity_info, 
+                       by = c("equip_id" = "equipment_id"), 
+                       suffix = c(".info",".activity")) %>% 
+  mutate(engineering_service_provider = if_else(condition = is.na(engineering_service_provider.activity),
+                                                true = engineering_service_provider.info,
+                                                false = engineering_service_provider.activity),
          most_recent_calibration = if_else(condition = is.na(most_recent_calibration.activity),
                                            true = most_recent_calibration.info,
                                            false = most_recent_calibration.activity),
          most_recent_maintenance = if_else(condition = is.na(most_recent_maintenance.activity),
                                            true = most_recent_maintenance.info,
                                            false = most_recent_maintenance.activity),
-         maintenance_engineer_nm = if_else(condition = is.na(maintenance_engineer_nm.activity),
-                                           true = maintenance_engineer_nm.info,
-                                           false = maintenance_engineer_nm.activity),
-         maintenance_engineer_post = if_else(condition = is.na(maintenance_engineer_post.activity),
-                                             true = maintenance_engineer_post.info,
-                                             false = maintenance_engineer_post.activity),
-         most_recent_maintenance = if_else(condition = is.na(most_recent_maintenance.activity),
-                                           true = most_recent_maintenance.info,
-                                           false = most_recent_maintenance.activity),
          submitted_by = if_else(condition = is.na(submitted_by.activity),
                                 true = submitted_by.info,
                                 false = submitted_by.activity),
+         submission_time = if_else(condition = is.na(submission_time.activity),
+                                   true = submission_time.info,
+                                   false = submission_time.activity),
          latitude = as.numeric(latitude),
          longitude = as.numeric(longitude),
          retirement_flag = if_else(condition = is.na(retirement_flag),
-                                            true = "No",
-                                            false = retirement_flag),
+                                   true = "No",
+                                   false = retirement_flag),
          retirement_flag = if_else(condition = retirement_flag == "Yes",
                                    true = "Yes",
-                                   false = "No")) %>% 
-  select(-matches("info|activity")) %>% 
-  mutate(expected_retirement_date = date_active + 720,
-         next_expected_calibration = most_recent_calibration + 90,
-         next_expected_maintenance = most_recent_maintenance + 180)
+                                   false = "No"),
+         submission_time = if_else(condition = submission_time.activity > submission_time.info &
+                                     !is.na(submission_time.activity),
+                                   true = submission_time.activity,
+                                   false = submission_time.info),
+         submission_date = ymd(str_sub(string = submission_time, start = 1, end = 10))) %>% 
+  select(-matches("info|activity")) #%>% 
+# Placeholder for getting next dates for stuff - may not need it, but comment it out for discussion
+  # mutate(expected_retirement_date = date_active + 720,
+         # next_expected_calibration = most_recent_calibration + 90,
+         # next_expected_maintenance = most_recent_maintenance + 180)
 
-calib_req_info <- read_csv(file = "https://ona.io/pacafenet/99874/461478/download.csv?data-type=dataset") %>% 
-  rename(submission_time = "_submission_time",
-         submitted_by = "_submitted_by",
-         equip_id = "Equipment_ID") %>%
-  mutate(submission_date = ymd(str_sub(string = submission_time, start = 1, end = 10))) %>% 
-  select(1:2, 6, 11, 16) %>% 
+calib_req_info <- calib_req_info_hist %>% 
   arrange(equip_id, desc(submission_time)) %>% 
   distinct(equip_id, .keep_all = T)
 
-maintenance_req_info <- read_csv(file = "https://ona.io/pacafenet/99874/461477/download.csv?data-type=dataset") %>% 
-  rename(submission_time = "_submission_time",
-         submitted_by = "_submitted_by",
-         equip_id = "Equipment_ID") %>% 
-  mutate(submission_date = ymd(str_sub(string = submission_time, start = 1, end = 10))) %>% 
-  select(1:2, 6, 11, 16) %>% 
+maintenance_req_info <- maintenance_req_info_hist %>% 
   arrange(equip_id, desc(submission_time)) %>% 
   distinct(equip_id, .keep_all = T)
+
+# Think this is where we can fix the logic to trigger emails
+
+# Once the joins are fixed for the request forms, which won't return any matches right now, use the following loginc as the basis for identifying 
+  # equipment in need of service.
+
+  # If most_recent_maintenance is not NA, AND freq_service_maintenance != 0 AND 
+    # if (today's date - most_recent_maintenance)/freq_service_maintenance > 1, Flag
+  # OR
+# If most_recent_maintenance is NA, AND freq_service_maintenance != 0 AND 
+  # if (today's date - date_active)/freq_service_maintenance > 1, Flag 
 
 curr_data_activity_req <- full_join(x = calib_req_info, y = maintenance_req_info, by = "equip_id", suffix = c("_calib", "_maint")) %>% 
   mutate(submitted_by = if_else(condition = is.na(submitted_by_calib),
@@ -366,6 +309,9 @@ curr_data_activity_req <- full_join(x = calib_req_info, y = maintenance_req_info
                                 false = submitted_by_calib)) %>% 
   select(-submitted_by_calib, -submitted_by_maint) %>% 
   right_join(x = ., y = curr_data, by = "equip_id") %>% 
+  
+  # HERE - this is where the conditions should be for saying whether or not the equipment needs attention - great stopping point
+  
   mutate(activity_required_calib = if_else(condition = (calibration_request_date > most_recent_calibration &
                                                           !is.na(calibration_request_date) &
                                                           retirement_flag != "Yes") |

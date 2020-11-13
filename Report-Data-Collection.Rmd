@@ -1,0 +1,303 @@
+---
+title: "Report Data Collection"
+description: |
+ This report contains a description of the data entered at the Nigeria pilot sites
+author:
+  - name: Travis Sondgerath
+date: '`r Sys.Date()`'
+output:
+  html_document:
+    # toc: true
+    # toc_depth: 2
+---
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = F,
+                      message = F,
+                      warning = F,
+                      results = "asis")
+
+library(dplyr)
+library(shiny)
+library(shinyWidgets)
+library(DT)
+library(tibble)
+library(lubridate)
+library(rmarkdown)
+library(leaflet)
+library(tidyr)
+library(ggplot2)
+library(stringr)
+library(gt)
+library(readr)
+library(shinydashboard)
+library(dashboardthemes)
+library(shinyWidgets)
+library(plotly)
+library(dashboardthemes)
+
+```
+
+# Introduction
+
+This report describes data entered at pilot sites in Nigeria. This report will server to summarize information collected using the [New Registration Form](https://enketo.ona.io/x/YwD9uv2j).
+
+# Summary
+
+```{r}
+
+equip_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/460026/download.csv?data-type=dataset",
+                                  na = c("n/a", "")) %>%  
+  rename(latitude = `_equip_location_latitude`,
+         longitude = `_equip_location_longitude`,
+         submission_time = "_submission_time",
+         submitted_by = "_submitted_by") %>% 
+  rename_all(~gsub(pattern = "-", replacement = "_", x = .)) %>% 
+  filter(submitted_by != "pacafenet" |
+           is.na(submitted_by)) %>% 
+  select(equip_id, manufacturer, facility, equip_type, equip_type_other, lab_level, lab_level_is_other, ownership_type, ownership_type_is_other,
+         waranty_status, equipment_status, equipment_purchase_status, manual_availability, manufacture_date, freq_service_maintenance, freq_calibration,
+         date_active, engineering_service_provider, engineering_service_provider_email_address, most_recent_calibration, most_recent_maintenance,
+         latitude, longitude, submitted_by, submission_time) %>% 
+  arrange(equip_id, desc(submission_time)) %>%  
+  group_by(equip_id) %>% 
+  # These if else's seem to account for when things are left blank, good idea, think all are required right now
+  mutate(manufacturer = if_else(condition = is.na(manufacturer),
+                                true = lead(manufacturer),
+                                false = manufacturer),
+         facility = if_else(condition = is.na(facility),
+                            true = lead(facility),
+                            false = facility),
+         equip_type = if_else(condition = is.na(equip_type),
+                              true = lead(equip_type),
+                              false = equip_type),
+         equip_type_other = if_else(condition = is.na(equip_type_other),
+                                    true = lead(equip_type_other),
+                                    false = equip_type_other),
+         lab_level = if_else(condition = is.na(lab_level),
+                             true = lead(lab_level),
+                             false = lab_level),
+         lab_level_is_other = if_else(condition = is.na(lab_level_is_other),
+                                      true = lead(lab_level_is_other),
+                                      false = lab_level_is_other),
+         ownership_type = if_else(condition = is.na(ownership_type),
+                                  true = lead(ownership_type),
+                                  false = ownership_type),
+         ownership_type_is_other = if_else(condition = is.na(ownership_type_is_other),
+                                           true = lead(ownership_type_is_other),
+                                           false = ownership_type_is_other),
+         waranty_status = if_else(condition = is.na(waranty_status),
+                                  true = lead(waranty_status),
+                                  false = waranty_status),
+         equipment_status = if_else(condition = is.na(equipment_status),
+                                    true = lead(equipment_status),
+                                    false = equipment_status),
+         equipment_purchase_status = if_else(condition = is.na(equipment_purchase_status),
+                                             true = lead(equipment_purchase_status),
+                                             false = equipment_purchase_status),
+         manual_availability = if_else(condition = is.na(manual_availability),
+                                       true = lead(manual_availability),
+                                       false = manual_availability),
+         manufacture_date = if_else(condition = is.na(manufacture_date),
+                                    true = lead(manufacture_date),
+                                    false = manufacture_date),
+         freq_service_maintenance = if_else(condition = is.na(freq_service_maintenance),
+                                            true = lead(freq_service_maintenance),
+                                            false = freq_service_maintenance),
+         freq_calibration = if_else(condition = is.na(freq_calibration),
+                                    true = lead(freq_calibration),
+                                    false = freq_calibration),
+         date_active = if_else(condition = is.na(date_active),
+                               true = lead(date_active),
+                               false = date_active),
+         engineering_service_provider = if_else(condition = is.na(engineering_service_provider),
+                                                true = lead(engineering_service_provider),
+                                                false = engineering_service_provider),
+         engineering_service_provider_email_address = if_else(condition = is.na(engineering_service_provider_email_address),
+                                                              true = lead(engineering_service_provider_email_address),
+                                                              false = engineering_service_provider_email_address),
+         most_recent_calibration = if_else(condition = is.na(most_recent_calibration),
+                                           true = lead(most_recent_calibration),
+                                           false = most_recent_calibration),
+         most_recent_maintenance = if_else(condition = is.na(most_recent_maintenance),
+                                           true = lead(most_recent_maintenance),
+                                           false = most_recent_maintenance),
+         latitude = if_else(condition = is.na(latitude),
+                            true = lead(latitude),
+                            false = latitude),
+         longitude = if_else(condition = is.na(longitude),
+                             true = lead(longitude),
+                             false = longitude),
+         submitted_by = if_else(condition = is.na(submitted_by),
+                                true = lead(submitted_by),
+                                false = submitted_by)) 
+
+```
+
+There have been `r length(unique(equip_info_historical$equip_id))` unique pieces of equipment added so far. Below is a brief summary of the data collected so far.
+
+
+
+```{r}
+
+# How many unique pieces of equipment
+
+
+
+# Looping through descriptive charts
+
+col_list <- colnames(equip_info_historical)[-1]
+
+for(i in col_list){
+  
+  # For testing
+  
+  # i <- "manufacturer"  # Counts/pct
+  # i <- "manufacture_date"  # Date range - this one is length 0
+  # i <- "freq_service_maintenance"
+  
+  # i <- "freq_service_maintenance"  # Continuous number
+  
+  # Counts
+  
+  if(i %in% c("manufactures", "facility", "equip_type", "equip_type_other", "lab_level", "lab_level_is_other", "ownership_type", 
+              "ownership_type_is_other", "waranty_status", "equipment_status", "equipment_purchase_status", "manual_availability",  
+              "engineering_service_provider", "engineering_service_provider_email_address")){
+    
+    count_data <- equip_info_historical %>% 
+      group_by_at(i) %>% 
+      tally() %>% 
+      rename_all(~str_to_title(string = str_replace_all(string = ., pattern = "_" , replacement = " "))) %>% 
+      mutate(pct = N/sum(.$N)) %>% 
+      add_row(N = sum(.$N, na.rm = T),
+              pct = 1)
+    
+    count_data[nrow(count_data), 1] <- "Total"
+    
+    count_chart <- count_data %>% 
+      gt() %>% 
+      cols_align(align = "center") %>%
+      cols_align(align = "right",
+                 columns = vars(N, pct)) %>%
+      cols_label(N = "Count") %>%
+      fmt_percent(columns = vars(pct), 
+                  decimals = 0) %>%
+      tab_header(title = paste(str_to_title(string = str_replace_all(string = i, pattern = "_" , replacement = " ")), "Count")) %>%
+      tab_options(row.striping.include_stub = T,
+                  row.striping.include_table_body = T,
+                  table.border.top.color = "black",
+                  table_body.border.bottom.color = "black",
+                  table.width = "80%")
+    
+    print(count_chart)
+    
+  }
+  
+  # Dates/Numbers
+  
+  if(i %in% c("freq_service_maintenance", "freq_calibration")){
+    
+    rows_not_na <- equip_info_historical %>% 
+      filter_at(vars(i), all_vars(!is.na(.)))
+    
+    if(nrow(rows_not_na) == 0){
+      
+      print(paste("No Data Entered for", str_to_title(string = str_replace_all(string = i, pattern = "_" , replacement = " "))))
+      
+      next
+      
+    }
+    
+    number_chart <- tibble(
+      min = round(min(equip_info_historical[i], na.rm = T), digits = 0),
+      max = round(max(equip_info_historical[i], na.rm = T), digits = 0),
+      avg = round(mean(equip_info_historical[[i]], na.rm = T), digits = 0),
+      med = round(median(equip_info_historical[[i]], na.rm = T), digits = 0)
+    ) %>% 
+      gt() %>%
+      cols_align(align = "right") %>%
+      cols_label(min = "Min",
+                 max = "Max",
+                 avg = "Average",
+                 med = "Median") %>%
+      fmt_number(columns = vars(min, max, avg, med),
+                 decimals = 0) %>%
+      tab_header(title = paste(str_to_title(string = str_replace_all(string = i, pattern = "_" , replacement = " ")), "Summary")) %>%
+      tab_options(row.striping.include_stub = T,
+                  row.striping.include_table_body = T,
+                  table.border.top.color = "black",
+                  table_body.border.bottom.color = "black",
+                  table.width = "80%")
+    
+    print(number_chart)
+    
+  }
+  
+  # Dates
+  
+  if(i %in% c("manufacture_date", "date_active", "most_recent_calibration", "most_recent_maintenance")){
+
+    rows_not_na <- equip_info_historical %>%
+      filter_at(vars(i), all_vars(!is.na(.)))
+
+    if(nrow(rows_not_na) == 0){
+
+      cat(paste("No Data Entered for", str_to_title(string = str_replace_all(string = i, pattern = "_" , replacement = " "))))
+      
+      next
+
+    }
+
+    date_chart <- tibble(
+      min = as.character(summary(equip_info_historical[[i]])[[1]]),
+      max = as.character(summary(equip_info_historical[[i]])[[6]]),
+      avg = as.character(summary(equip_info_historical[[i]])[[4]]),
+      med = as.character(summary(equip_info_historical[[i]])[[3]])
+    ) %>%
+      gt() %>%
+      cols_align(align = "center") %>%
+      cols_label(min = "Min",
+                 max = "Max",
+                 avg = "Average",
+                 med = "Median") %>%
+      fmt_date(columns = vars(min, max, avg, med),
+               date_style = 5) %>%
+      tab_header(title = paste(str_to_title(string = str_replace_all(string = i, pattern = "_" , replacement = " ")), "Summary")) %>%
+      tab_options(row.striping.include_stub = T,
+                  row.striping.include_table_body = T,
+                  table.border.top.color = "black",
+                  table_body.border.bottom.color = "black",
+                  table.width = "80%")
+
+    print(date_chart)
+    
+  }
+  
+}
+
+# Count by manufactures
+  # See if typos possible
+  # May want to upcase
+
+# Count by facility
+  # Same as above
+
+# Count by equip type
+
+# Count by other
+  # consider adding more to the list?
+
+# Also count by lab_level lab_level_is_other ownership_type ownership_type_is_other waranty_status equipment_status equipment_purchase_status manual_availability, engineering_service_provider engineering_service_provider_email_address
+
+# Range of manufacture_date, freq_service_maintenance, freq_calibration, date_active,most_recent_calibration most_recent_maintenance
+
+# ^^^ Should be done in a loop
+
+```
+
+
+
+
+
+
