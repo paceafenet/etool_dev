@@ -45,6 +45,8 @@ This report describes data entered at pilot sites in Nigeria. This report will s
 
 # Summary
 
+Eventually this report should be edited to show just the current state of the data. 
+
 ```{r}
 
 equip_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/460026/download.csv?data-type=dataset",
@@ -135,8 +137,9 @@ equip_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/460026/
 
 ```
 
-There have been `r length(unique(equip_info_historical$equip_id))` unique pieces of equipment added so far. Below is a brief summary of the data collected so far.
 
+
+There have been `r length(unique(equip_info_historical$equip_id))` unique pieces of equipment added so far. Below is a brief summary of the data collected so far.
 
 
 ```{r}

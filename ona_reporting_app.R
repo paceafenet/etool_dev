@@ -8,6 +8,8 @@
 # Add email context to allow for notifications. 
   # Logic starts at line 
 
+# May want to move this file to another script
+
 #######################
 
 #########################################################################################################
@@ -125,8 +127,10 @@ equip_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/460026/
                              false = longitude),
          submitted_by = if_else(condition = is.na(submitted_by),
                                 true = lead(submitted_by),
-                                false = submitted_by),
-         equip_id = as.character(equip_id))
+                                false = submitted_by)) %>% 
+  ungroup() %>% 
+  mutate(equip_id = as.character(equip_id))
+
 
 # Activity form - still based on just fake data, so no changes made as of yet - FIX LATER
 
@@ -185,7 +189,8 @@ req_info_hist <- full_join(x = calib_req_info_hist, y = maintenance_req_info_his
   mutate(submitted_by = if_else(condition = is.na(submitted_by_calib),
                                 true = submitted_by_maint,
                                 false = submitted_by_calib)) %>% 
-  select(-submitted_by_calib, -submitted_by_maint)
+  select(-submitted_by_calib, -submitted_by_maint) %>% 
+  filter(submitted_by != "pacafenet")
 
 # Joins equipment information to activity events
   # still based on fake data, won't be anything added here as of yet. No Matches until requests come in. Change the activity form to match the 
@@ -310,26 +315,92 @@ curr_data_activity_req <- full_join(x = calib_req_info, y = maintenance_req_info
   select(-submitted_by_calib, -submitted_by_maint) %>% 
   right_join(x = ., y = curr_data, by = "equip_id") %>% 
   
-  # HERE - this is where the conditions should be for saying whether or not the equipment needs attention - great stopping point
-  
-  mutate(activity_required_calib = if_else(condition = (calibration_request_date > most_recent_calibration &
-                                                          !is.na(calibration_request_date) &
-                                                          retirement_flag != "Yes") |
-                                             next_expected_calibration < most_recent_calibration,
+    # See how NA's are handled - also see if it's a character value
+  mutate(activity_required_maint = if_else(condition = 
+                                             (
+                                               !is.na(most_recent_maintenance) &
+                                                 freq_service_maintenance != 0 &
+                                                 retirement_flag != "Yes" &
+                                                 ((Sys.Date() - most_recent_maintenance) / freq_service_maintenance) > 1
+                                             ) |
+                                             (
+                                               is.na(most_recent_maintenance) &
+                                                 freq_service_maintenance != 0 &
+                                                 retirement_flag != "Yes" &
+                                                 ((Sys.Date() - date_active) / freq_service_maintenance) > 1
+                                             ) |
+                                             (  
+                                               maintenance_request_date > most_recent_maintenance &
+                                                 !is.na(maintenance_request_date) &
+                                                 retirement_flag != "Yes"
+                                             ),
                                            true = "Yes",
                                            false = "No"),
-         activity_required_maint = if_else(condition = (maintenance_request_date > most_recent_maintenance &
-                                                          !is.na(maintenance_request_date) &
-                                                          retirement_flag != "Yes") |
-                                             next_expected_maintenance < most_recent_maintenance,
+         activity_required_calib = if_else(condition = 
+                                             (
+                                               !is.na(most_recent_calibration) &
+                                                 freq_calibration != 0 &
+                                                 retirement_flag != "Yes" &
+                                                 ((Sys.Date() - most_recent_calibration) / freq_calibration) > 1
+                                             ) |
+                                             (
+                                               is.na(most_recent_calibration) &
+                                                 freq_calibration != 0 &
+                                                 retirement_flag != "Yes" &
+                                                 ((Sys.Date() - date_active) / freq_calibration) > 1
+                                             ) |
+                                             (  
+                                               calibration_request_date > most_recent_calibration &
+                                                 !is.na(calibration_request_date) &
+                                                 retirement_flag != "Yes"
+                                             ),
                                            true = "Yes",
                                            false = "No"),
-         submitted_by = submitted_by.y,
-         submission_date = if_else(condition = submission_date_calib > submission_date_maint &
+         submitted_by = submitted_by.y) %>% 
+  group_by(equip_id) %>%
+  mutate(submission_date = if_else(condition = submission_date_calib > submission_date_maint &
                                      !is.na(submission_date_calib),
                                    true = submission_date_calib,
-                                   false = submission_date_maint)) %>% 
-  select(-submitted_by.x, -submitted_by.y)
+                                   false = submission_date_maint)) %>%
+  select(-submitted_by.x, -submitted_by.y) %>% 
+  mutate(next_expected_calibration = if_else(condition = 
+                                               calibration_request_date > most_recent_calibration &
+                                               !is.na(calibration_request_date) &
+                                               retirement_flag != "Yes",
+                                             true = Sys.Date(),
+                                             false = if_else(condition = 
+                                                               !is.na(most_recent_calibration) &
+                                                               freq_calibration != 0 &
+                                                               retirement_flag != "Yes" &
+                                                               ((Sys.Date() - most_recent_calibration) / freq_calibration) > 1,
+                                                             true = most_recent_calibration + freq_calibration - 10,  
+                                                             # Minus 10 => arbitrary, notice before due
+                                                             false = if_else(condition = 
+                                                                               is.na(most_recent_calibration) &
+                                                                               freq_calibration != 0 &
+                                                                               retirement_flag != "Yes" &
+                                                                               ((Sys.Date() - date_active) / freq_calibration) > 1,
+                                                                             true = date_active + freq_calibration - 10,
+                                                                             false = ymd("2050-1-1")))),
+         next_expected_maintenance = if_else(condition = 
+                                               maintenance_request_date > most_recent_maintenance &
+                                               !is.na(maintenance_request_date) &
+                                               retirement_flag != "Yes",
+                                             true = Sys.Date(),
+                                             false = if_else(condition = 
+                                                               !is.na(most_recent_maintenance) &
+                                                               freq_service_maintenance != 0 &
+                                                               retirement_flag != "Yes" &
+                                                               ((Sys.Date() - most_recent_maintenance) / freq_service_maintenance) > 1,
+                                                             true = most_recent_maintenance + freq_service_maintenance - 10,  
+                                                             # Minus 10 => arbitrary, notice before due
+                                                             false = if_else(condition = 
+                                                                               is.na(most_recent_maintenance) &
+                                                                               freq_service_maintenance != 0 &
+                                                                               retirement_flag != "Yes" &
+                                                                               ((Sys.Date() - date_active) / freq_service_maintenance) > 1,
+                                                                             true = date_active + freq_service_maintenance - 10,
+                                                                             false = ymd("2050-1-1")))))
 
 #########################################################################################################
 
@@ -452,6 +523,7 @@ ui <- dashboardPage(
               
               fluidRow(gt_output("equip_details_table")),
               
+              # Update link and see what we want to show here
               fluidRow(h3(a("Enter Equipment Information", href = "https://enketo.ona.io/x/#xsR3wR1v")))
               
               ),  
@@ -552,7 +624,8 @@ ui <- dashboardPage(
                                       label = "Download Data")),
               
               fluidRow(gt_output("equip_activity_hist_table")),
-
+              
+              # Decide if we want to show this and update link if necessary               
               fluidRow(h3(a("Enter Activity Information", href = "https://enketo.ona.io/x/#JBXgIyIf")))
               
               ),
@@ -601,8 +674,10 @@ ui <- dashboardPage(
               
               fluidRow(gt_output("equip_req_table")),
               
+              # Update link if necessary
               fluidRow(h3(a("Request Calibration", href = "https://enketo.ona.io/x/#VI2FevM7"))),
               
+              # Update link if necessary
               fluidRow(h3(a("Request Maintenance", href = "https://enketo.ona.io/x/#OPkgR4Hc")))
               
               )
@@ -616,51 +691,61 @@ server <- function(input, output, session) {
     
     tt <- curr_data_activity_req %>%   
       filter(equip_id %in% c(input$equipment_id) &
-               equip_type %in% c(input$equipment_type) &
-               facility %in% c(input$facility) &
-               submitted_by %in% c(input$submitted_by)) %>%
+      equip_type %in% c(input$equipment_type) &
+      facility %in% c(input$facility) &
+      submitted_by %in% c(input$submitted_by)) %>%
+      ungroup() %>% 
+      mutate(submission_time = ymd(paste(year(submission_time),
+                                         month(submission_time),
+                                         day(submission_time),
+                                         sep = "-"))) %>% 
       gt() %>% 
       cols_align(align = "center") %>%
-      cols_hide(columns = vars(calibration_request_date,
-                               submission_time_calib,
-                               maintenance_request_date,
-                               submission_time_maint,
-                               lab_level_is_other,
+      cols_hide(columns = vars(activity_required_calib,
+                               activity_required_maint,
+                               calibration_request_date,
+                               engineering_service_provider_email_address,
+                               equip_type_other,
+                               equipment_purchase_status,
+                               equipment_status,
+                               freq_calibration,
+                               freq_service_maintenance,
+                               lab_level,
                                latitude,
                                longitude,
+                               maintenance_request_date,
+                               manual_availability,
+                               manufacture_date,
                                most_recent_calibration,
                                most_recent_maintenance,
-                               expected_retirement_date,
                                next_expected_calibration,
                                next_expected_maintenance,
-                               activity_required_calib,
-                               activity_required_maint,
+                               ownership_type_is_other,
                                submission_date_calib,
-                               submission_date_maint)) %>%  
-      cols_move(columns = vars(ownership_type),
-                after = vars(lab_level)) %>%  
-      cols_move(columns = vars(retirement_flag),
-                after = vars(maintenance_engineer_post)) %>%  
-      cols_label(equip_id = "Equipment ID", 
-                 submitted_by = "Submitted by",
+                               submission_date_maint,
+                               submission_date,
+                               submission_time_calib,
+                               submission_time_maint)) %>%
+      cols_move(columns = vars(lab_level_is_other),
+                after = vars(facility)) %>% 
+      cols_label(date_active = "Date Active",
+                 engineering_service_provider = "Service Provider",
+                 equip_id = "Equipment ID", 
                  equip_type = "Equipment Type",
-                 manufacturer = "Manufacturer",
-                 manufacture_date = "Manufacture Date",
-                 date_active = "Date Active",
                  facility = "Facility",
+                 lab_level_is_other = "Facility Level", 
+                 manufacturer = "Manufacturer",
                  ownership_type = "Ownership Type",
-                 lab_level = "Facility Level", 
-                 calib_engineer_nm = "Calibration Engineer Name",
-                 calib_engineer_post = "Calibration Engineer Post", 
-                 maintenance_engineer_nm = "Maintenance Engineer Name",
-                 maintenance_engineer_post = "Maintenance Engineer Post",
                  retirement_flag = "Retirement Flag",
-                 submission_date = "Last Updated") %>%
+                 submitted_by = "Submitted by",
+                 submission_time = "Last Updated",
+                 waranty_status = "Waranty") %>%
       fmt_missing(columns = everything(),
                   missing_text = "") %>% 
-      cols_width(vars(date_active) ~ px(100),
-                 vars(equip_id) ~ px(80),
-                 vars(manufacturer) ~ px(125)) %>% 
+      # See how the column widths look in the app before adjusting
+      cols_width(vars(date_active, submission_time, equip_type) ~ px(125),
+                 vars(equip_id, facility, waranty_status) ~ px(80),
+                 vars(manufacturer) ~ px(125)) %>%
       tab_style(style = list(cell_fill(color = "white"),
                              cell_text(color = "red")),  
                 locations = cells_data(columns = vars(equip_id),
@@ -730,24 +815,25 @@ server <- function(input, output, session) {
   output$equip_activity_hist_table <- render_gt({
     
     tt <- historical_data %>%
-      filter(equip_id %in% c(input$equipment_id_hist) &
-               equip_type %in% c(input$equipment_type_hist) &  
-               manufacturer %in% c(input$manufacturer_hist) &
-               facility %in% c(input$facility_hist) &
-               submitted_by %in% c(input$submitted_by_hist) &
-               submission_date >= input$dt_submitted_hist[1] &  
-               submission_date <= input$dt_submitted_hist[2] &
-               manufacture_date >= input$dt_manufacture_hist[1] &
-               manufacture_date <= input$dt_manufacture_hist[2] &
-               date_active >= input$dt_active_hist[1] &
-               date_active <= input$dt_active_hist[2] &
-               most_recent_calibration >= input$dt_calibration_hist[1] &
-               most_recent_calibration <= input$dt_calibration_hist[2] &
-               most_recent_maintenance >= input$dt_maintenance_hist[1] &
-               most_recent_maintenance <= input$dt_maintenance_hist[2]) %>%
+      # filter(equip_id %in% c(input$equip_id) &
+               # equip_type %in% c(input$equipment_type) &  
+               # manufacturer %in% c(input$manufacturer) &
+               # facility %in% c(input$facility_hist) &
+               # submitted_by %in% c(input$submitted_by) &
+               # submission_date >= input$submission_date[1] &  
+               # submission_date <= input$submission_date[2] &
+               # manufacture_date >= input$dt_manufacture[1] &
+               # manufacture_date <= input$dt_manufacture[2] &
+               # date_active >= input$date_active[1] &
+               # date_active <= input$date_active[2] &
+               # most_recent_calibration >= input$most_recent_calibration[1] &
+               # most_recent_calibration <= input$most_recent_calibration[2] &
+               # most_recent_maintenance >= input$most_recent_maintenance[1] &
+               # most_recent_maintenance <= input$most_recent_maintenance[2]) %>%
       ungroup() %>% 
       gt() %>%
       cols_align(align = "center") %>%
+      # HERE
       cols_hide(columns = vars(lab_level_is_other,  
                                latitude,                 
                                longitude,
@@ -992,7 +1078,7 @@ server <- function(input, output, session) {
   
   output$kpi_pieces_active_equip <- renderValueBox(  # Current data
     valueBox(value = prettyNum(tt <- curr_data_activity_req %>% 
-                                 filter(retirement_flag == "No")%>% 
+                                 filter(retirement_flag == "No") %>% 
                                  nrow(), 
                                big.mark = ","),
              subtitle = "Active Pieces of Equipment")
@@ -1063,9 +1149,9 @@ server <- function(input, output, session) {
       coord_flip() +
       theme_classic() + 
       xlab("Facility") + 
-      scale_y_continuous(name = "Number of Labs",
+      scale_y_continuous(name = "Pieces of Equipment Registered",
                          limits = c(0, sum(tt$Yes, na.rm = T)),
-                         breaks = seq(0, sum(tt$Yes, na.rm = T), 1)) +
+                         breaks = seq(0, sum(tt$Yes, na.rm = T), 5)) +
       theme(legend.position = "none",
             axis.text.x = element_text(face = "bold"),
             axis.text.y = element_text(face = "bold"),
@@ -1093,7 +1179,7 @@ server <- function(input, output, session) {
       xlab("Facility") +  # Changes
       scale_y_continuous(name = "% Equipment Requiring Attention",  # Changes
                          limits = c(0, 100),
-                         breaks = seq(0, 100, 5)) +
+                         breaks = seq(0, 100, 10)) +
       theme(legend.position = "none",
             axis.text.x = element_text(face = "bold"),
             axis.text.y = element_text(face = "bold"),
@@ -1119,7 +1205,7 @@ server <- function(input, output, session) {
       xlab("Requires Attention") + 
       scale_y_continuous(name = "Count",
                          limits = c(0, sum(tt$n, na.rm = T)),
-                         breaks = seq(0, sum(tt$n, na.rm = T), 1)) +
+                         breaks = seq(0, sum(tt$n, na.rm = T), 5)) +
       theme(legend.position = "none",
             axis.text.x = element_text(face = "bold"),
             axis.text.y = element_text(face = "bold"),
@@ -1130,24 +1216,28 @@ server <- function(input, output, session) {
 
   output$equip_attention_level_bar <- renderPlotly({  # Current data
 
+      # May want to alter what column we aggregate by
     tt <- curr_data_activity_req %>%
       filter(retirement_flag != "Yes") %>%
       mutate(requires_attn = if_else(condition = activity_required_calib == "Yes" | activity_required_maint == "Yes",
                                      true = "Yes",
-                                     false = "No")) %>%
-      group_by(lab_level, requires_attn) %>%  
+                                     false = "No"),
+             level_grouper = if_else(condition = lab_level == "Other",
+                                     true = lab_level_is_other,
+                                     false = lab_level)) %>%
+      group_by(level_grouper, requires_attn) %>% 
       tally() %>% 
       pivot_wider(names_from = requires_attn, values_from = n, values_fill = list(n = 0))
 
     tt2 <- tt %>%
-      ggplot(aes(x = lab_level, weight = Yes)) + 
+      ggplot(aes(x = level_grouper, weight = Yes)) + 
       geom_bar(fill = "white", color = "black") +
       coord_flip() +
       theme_classic() +
       xlab("Lab Level") +  
       scale_y_continuous(name = "Count", 
                          limits = c(0, sum(tt$Yes, na.rm = T)),
-                         breaks = seq(0, sum(tt$Yes, na.rm = T), 1)) +
+                         breaks = seq(0, sum(tt$Yes, na.rm = T), 5)) +
       theme(legend.position = "none",
             axis.text.x = element_text(face = "bold"),
             axis.text.y = element_text(face = "bold"),
