@@ -506,16 +506,16 @@ ui <- dashboardPage(
                                    multiple = T,
                                    options = list(`actions-box` = T,
                                                   `live-search` = T))
-                ),
-                column(width = 3,
-                       pickerInput(inputId = "submitted_by",
-                                   label = "Choose Survey Respondent(s):",
-                                   choices = sort(unique(curr_data_activity_req$submitted_by)),
-                                   selected = sort(unique(curr_data_activity_req$submitted_by)),
-                                   multiple = T,
-                                   options = list(`actions-box` = T,
-                                                  `live-search` = T))
-                )
+                )#,
+                # column(width = 3,
+                #        pickerInput(inputId = "submitted_by",
+                #                    label = "Choose Survey Respondent(s):",
+                #                    choices = sort(unique(curr_data_activity_req$submitted_by)),
+                #                    selected = sort(unique(curr_data_activity_req$submitted_by)),
+                #                    multiple = T,
+                #                    options = list(`actions-box` = T,
+                #                                   `live-search` = T))
+                # )
               ),
               
               fluidRow(downloadButton(outputId = "download_equip_details",
@@ -568,57 +568,57 @@ ui <- dashboardPage(
                 )
               ), 
               
-              fluidRow(
-                column(width = 2,
-                  dateRangeInput(inputId = "dt_submitted_hist",
-                                 label = "Select Submission Date Range:",
-                                 start = min(historical_data$submission_date, na.rm = T),
-                                 end = max(historical_data$submission_date, na.rm = T),
-                                 min = min(historical_data$submission_date, na.rm = T),
-                                 max = max(historical_data$submission_date, na.rm = T))
-                ),
-                column(width = 2,
-                  dateRangeInput(inputId = "dt_manufacture_hist",
-                                 label = "Select Manufacture Date Range:",
-                                 start = min(historical_data$manufacture_date, na.rm = T),
-                                 end = max(historical_data$manufacture_date, na.rm = T),
-                                 min = min(historical_data$manufacture_date, na.rm = T),
-                                 max = max(historical_data$manufacture_date, na.rm = T))
-                ),
-                column(width = 2,
-                  dateRangeInput(inputId = "dt_active_hist",
-                                 label = "Select Active Date Range:",
-                                 start = min(historical_data$date_active, na.rm = T),
-                                 end = max(historical_data$date_active, na.rm = T),
-                                 min = min(historical_data$date_active, na.rm = T),
-                                 max = max(historical_data$date_active, na.rm = T))
-                ),
-                column(width = 2,
-                  dateRangeInput(inputId = "dt_calibration_hist",
-                                 label = "Select Calibration Date Range:",
-                                 start = min(historical_data$most_recent_calibration, na.rm = T),
-                                 end = max(historical_data$most_recent_calibration, na.rm = T),
-                                 min = min(historical_data$most_recent_calibration, na.rm = T),
-                                 max = max(historical_data$most_recent_calibration, na.rm = T))
-                ),
-                column(width = 2,
-                  dateRangeInput(inputId = "dt_maintenance_hist",
-                                 label = "Select Maintenance Date Range:",
-                                 start = min(historical_data$most_recent_maintenance, na.rm = T),
-                                 end = max(historical_data$most_recent_maintenance, na.rm = T),
-                                 min = min(historical_data$most_recent_maintenance, na.rm = T),
-                                 max = max(historical_data$most_recent_maintenance, na.rm = T))
-                ),
-                column(width = 2,
-                  pickerInput(inputId = "submitted_by_hist",
-                              label = "Choose Survey Respondent(s):",
-                              choices = sort(unique(historical_data$submitted_by)),
-                              selected = sort(unique(historical_data$submitted_by)),
-                              multiple = T,
-                              options = list(`actions-box` = T,
-                                             `live-search` = T))
-                )
-              ),
+              # fluidRow(
+                # column(width = 2,
+                #   dateRangeInput(inputId = "dt_submitted_hist",
+                #                  label = "Select Submission Date Range:",
+                #                  start = min(historical_data$submission_date, na.rm = T),
+                #                  end = max(historical_data$submission_date, na.rm = T),
+                #                  min = min(historical_data$submission_date, na.rm = T),
+                #                  max = max(historical_data$submission_date, na.rm = T))
+                # ),
+                # column(width = 2,
+                #   dateRangeInput(inputId = "dt_manufacture_hist",
+                #                  label = "Select Manufacture Date Range:",
+                #                  start = min(historical_data$manufacture_date, na.rm = T),
+                #                  end = max(historical_data$manufacture_date, na.rm = T),
+                #                  min = min(historical_data$manufacture_date, na.rm = T),
+                #                  max = max(historical_data$manufacture_date, na.rm = T))
+                # ),
+                # column(width = 2,
+                #   dateRangeInput(inputId = "dt_active_hist",
+                #                  label = "Select Active Date Range:",
+                #                  start = min(historical_data$date_active, na.rm = T),
+                #                  end = max(historical_data$date_active, na.rm = T),
+                #                  min = min(historical_data$date_active, na.rm = T),
+                #                  max = max(historical_data$date_active, na.rm = T))
+                # ),
+                # column(width = 2,
+                #   dateRangeInput(inputId = "dt_calibration_hist",
+                #                  label = "Select Calibration Date Range:",
+                #                  start = min(historical_data$most_recent_calibration, na.rm = T),
+                #                  end = max(historical_data$most_recent_calibration, na.rm = T),
+                #                  min = min(historical_data$most_recent_calibration, na.rm = T),
+                #                  max = max(historical_data$most_recent_calibration, na.rm = T))
+                # ),
+                # column(width = 2,
+                #   dateRangeInput(inputId = "dt_maintenance_hist",
+                #                  label = "Select Maintenance Date Range:",
+                #                  start = min(historical_data$most_recent_maintenance, na.rm = T),
+                #                  end = max(historical_data$most_recent_maintenance, na.rm = T),
+                #                  min = min(historical_data$most_recent_maintenance, na.rm = T),
+                #                  max = max(historical_data$most_recent_maintenance, na.rm = T))
+                # )#,
+                # column(width = 2,
+                #   pickerInput(inputId = "submitted_by_hist",
+                #               label = "Choose Survey Respondent(s):",
+                #               choices = sort(unique(historical_data$submitted_by)),
+                #               selected = sort(unique(historical_data$submitted_by)),
+                #               multiple = T,
+                #               options = list(`actions-box` = T,
+                #                              `live-search` = T))
+                # )
+              # ),
               
               fluidRow(downloadButton(outputId = "download_equip_activity_hist_details",
                                       label = "Download Data")),
@@ -650,23 +650,23 @@ ui <- dashboardPage(
                                    multiple = T,
                                    options = list(`actions-box` = T,
                                                   `live-search` = T))
-                ),
-                column(width = 3,
-                       dateRangeInput(inputId = "dt_calibration_req",
-                                      label = "Select Calibration Request Date Range:",
-                                      start = min(curr_data_activity_req$calibration_request_date, na.rm = T),
-                                      end = max(curr_data_activity_req$calibration_request_date, na.rm = T),
-                                      min = min(curr_data_activity_req$calibration_request_date, na.rm = T),
-                                      max = max(curr_data_activity_req$calibration_request_date, na.rm = T))
-                ),
-                column(width = 3,
-                       dateRangeInput(inputId = "dt_maintenance_req",
-                                      label = "Select Maintenance Request Date Range:",
-                                      start = min(curr_data_activity_req$maintenance_request_date, na.rm = T),
-                                      end = max(curr_data_activity_req$maintenance_request_date, na.rm = T),
-                                      min = min(curr_data_activity_req$maintenance_request_date, na.rm = T),
-                                      max = max(curr_data_activity_req$maintenance_request_date, na.rm = T))
-                )
+                )#,
+                # column(width = 3,
+                #        dateRangeInput(inputId = "dt_calibration_req",
+                #                       label = "Select Calibration Request Date Range:",
+                #                       start = min(curr_data_activity_req$calibration_request_date, na.rm = T),
+                #                       end = max(curr_data_activity_req$calibration_request_date, na.rm = T),
+                #                       min = min(curr_data_activity_req$calibration_request_date, na.rm = T),
+                #                       max = max(curr_data_activity_req$calibration_request_date, na.rm = T))
+                # ),
+                # column(width = 3,
+                #        dateRangeInput(inputId = "dt_maintenance_req",
+                #                       label = "Select Maintenance Request Date Range:",
+                #                       start = min(curr_data_activity_req$maintenance_request_date, na.rm = T),
+                #                       end = max(curr_data_activity_req$maintenance_request_date, na.rm = T),
+                #                       min = min(curr_data_activity_req$maintenance_request_date, na.rm = T),
+                #                       max = max(curr_data_activity_req$maintenance_request_date, na.rm = T))
+                # )
               ),
               
               fluidRow(downloadButton(outputId = "download_equip_req_details",
@@ -692,8 +692,7 @@ server <- function(input, output, session) {
     tt <- curr_data_activity_req %>%   
       filter(equip_id %in% c(input$equipment_id) &
       equip_type %in% c(input$equipment_type) &
-      facility %in% c(input$facility) &
-      submitted_by %in% c(input$submitted_by)) %>%
+      facility %in% c(input$facility)) %>%
       ungroup() %>% 
       mutate(submission_time = ymd(paste(year(submission_time),
                                          month(submission_time),
@@ -725,7 +724,8 @@ server <- function(input, output, session) {
                                submission_date_maint,
                                submission_date,
                                submission_time_calib,
-                               submission_time_maint)) %>%
+                               submission_time_maint,
+                               submitted_by)) %>%
       cols_move(columns = vars(lab_level_is_other),
                 after = vars(facility)) %>% 
       cols_label(date_active = "Date Active",
@@ -737,12 +737,10 @@ server <- function(input, output, session) {
                  manufacturer = "Manufacturer",
                  ownership_type = "Ownership Type",
                  retirement_flag = "Retirement Flag",
-                 submitted_by = "Submitted by",
                  submission_time = "Last Updated",
                  waranty_status = "Waranty") %>%
       fmt_missing(columns = everything(),
                   missing_text = "") %>% 
-      # See how the column widths look in the app before adjusting
       cols_width(vars(date_active, submission_time, equip_type) ~ px(125),
                  vars(equip_id, facility, waranty_status) ~ px(80),
                  vars(manufacturer) ~ px(125)) %>%
@@ -769,108 +767,83 @@ server <- function(input, output, session) {
   output$download_equip_details <- downloadHandler(
 
     filename = function(){
-      paste0("Equipment Details Data ", Sys.Date(), ".xlsx")},
+      paste0("Equipment Details Data ", Sys.Date(), ".csv")},
     
     content = function(file){
-      xlsx::write.xlsx(as.data.frame(equip_details_export <- curr_data_activity_req %>%
-                                       filter(equip_type %in% c(input$equipment_type) &
-                                                facility %in% c(input$facility) &
-                                                submitted_by %in% c(input$submitted_by)) %>%
-                                       select(equip_id,
-                                              submitted_by,
-                                              equip_type,
-                                              manufacturer,
-                                              manufacture_date,
-                                              date_active,
-                                              facility,
-                                              ownership_type,
-                                              lab_level,
-                                              calib_engineer_nm,
-                                              calib_engineer_post,
-                                              maintenance_engineer_nm,
-                                              maintenance_engineer_post,
-                                              retirement_flag) %>%
-                                       rename("Equip ID" = equip_id,
-                                              "Submitted by" = submitted_by,
-                                              "Equipment Type" = equip_type,
-                                              "Manufacturer" = manufacturer,
-                                              "Manufacture Date" = manufacture_date,
-                                              "Date Active" = date_active,
-                                              "Facility" = facility,
-                                              "Ownership Type" = ownership_type,
-                                              "Facility Level" = lab_level,
-                                              "Calibration Engineer Name" = calib_engineer_nm,
-                                              "Calibration Engineer Post" = calib_engineer_post,
-                                              "Maintenance Engineer Name" = maintenance_engineer_nm,
-                                              "Maintenance Engineer Post" = maintenance_engineer_post,
-                                              "Retirement Flag" = retirement_flag)),
-                       file = file, 
-                       sheetName = "Equip Details",
-                       showNA = F,
-                       row.names = F,
-                       append = F)
+      write_csv(equip_details_export <- curr_data_activity_req %>%
+                  filter(equip_id %in% c(input$equipment_id) &
+                           equip_type %in% c(input$equipment_type) &
+                           facility %in% c(input$facility)) %>%
+                  select(date_active, engineering_service_provider, equip_id, equip_type, facility, lab_level_is_other,
+                         manufacturer, ownership_type, retirement_flag, submission_time, waranty_status) %>%
+                  rename(`Date Active` = date_active,
+                         `Service Provider` = engineering_service_provider,
+                         `Equipment ID` = equip_id, 
+                         `Equipment Type` = equip_type,
+                         Facility = facility,
+                         `Facility Level` = lab_level_is_other, 
+                         Manufacturer = manufacturer,
+                         `Ownership Type` = ownership_type,
+                         `Retirement Flag` = retirement_flag,
+                         `Last Updated` = submission_time,
+                         `Waranty` = waranty_status),
+                path = file,
+                na = "",
+                append = F)
     }
   )
   
   output$equip_activity_hist_table <- render_gt({
     
     tt <- historical_data %>%
-      # filter(equip_id %in% c(input$equip_id) &
-               # equip_type %in% c(input$equipment_type) &  
-               # manufacturer %in% c(input$manufacturer) &
-               # facility %in% c(input$facility_hist) &
-               # submitted_by %in% c(input$submitted_by) &
-               # submission_date >= input$submission_date[1] &  
-               # submission_date <= input$submission_date[2] &
-               # manufacture_date >= input$dt_manufacture[1] &
-               # manufacture_date <= input$dt_manufacture[2] &
-               # date_active >= input$date_active[1] &
-               # date_active <= input$date_active[2] &
-               # most_recent_calibration >= input$most_recent_calibration[1] &
-               # most_recent_calibration <= input$most_recent_calibration[2] &
-               # most_recent_maintenance >= input$most_recent_maintenance[1] &
-               # most_recent_maintenance <= input$most_recent_maintenance[2]) %>%
+      filter(equip_id %in% c(input$equipment_id_hist) &
+               equip_type %in% c(input$equipment_type_hist) &
+               manufacturer %in% c(input$manufacturer_hist) &
+               facility %in% c(input$facility_hist)) %>%
       ungroup() %>% 
       gt() %>%
       cols_align(align = "center") %>%
-      # HERE
-      cols_hide(columns = vars(lab_level_is_other,  
+      cols_hide(columns = vars(engineering_service_provider_email_address,
+                               equip_type_other,
+                               freq_service_maintenance,
+                               freq_calibration,
+                               lab_level,  
                                latitude,                 
                                longitude,
-                               submission_time,
-                               retirement_flag)) %>%
-      cols_move(columns = vars(ownership_type),
-                after = vars(lab_level)) %>%
-      cols_move(columns = vars(retirement_flag),
-                after = vars(submission_date)) %>%
-      cols_move(columns = vars(most_recent_maintenance),
-                after = vars(maintenance_engineer_post)) %>% 
-      cols_label(equip_id = "Equipment ID",
-                 submitted_by = "Submitted by",
+                               manufacture_date,
+                               ownership_type_is_other,
+                               submission_time)) %>%
+      fmt_missing(columns = everything(),
+                  missing_text = "") %>% 
+      cols_move(columns = vars(lab_level_is_other),
+                after = vars(facility)) %>% 
+      cols_move(columns = vars(engineering_service_provider),
+                after = vars(waranty_status)) %>% 
+      cols_label(date_active = "Date Active",
+                 engineering_service_provider = "Service Provider",
+                 equip_id = "Equipment ID",
+                 equipment_purchase_status = "Purchased By",
+                 equipment_status = "Status",
                  equip_type = "Equipment Type",
+                 facility = "Facility",
+                 lab_level_is_other = "Facility Level",
+                 manual_availability = "Manual Available",
                  manufacturer = "Manufacturer",
                  manufacture_date = "Manufacture Date",
-                 date_active = "Date Active",
-                 facility = "Facility",
-                 ownership_type = "Ownership Type",
-                 lab_level = "Facility Level",
-                 calib_engineer_nm = "Calibration Engineer Name",
-                 calib_engineer_post = "Calibration Engineer Post",
-                 maintenance_engineer_nm = "Maintenance Engineer Name",
-                 maintenance_engineer_post = "Maintenance Engineer Post",
                  most_recent_calibration = "Most Recent Calibration",
                  most_recent_maintenance = "Most Recent Maintenance",
-                 submission_date = "Submission Date") %>%
+                 ownership_type = "Ownership Type",
+                 retirement_flag = "Retirement Flag",
+                 submission_date = "Submission Date",
+                 submitted_by = "Submitted by",
+                 waranty_status = "Warranty Status") %>%
       cols_width(vars(date_active) ~ px(100),
                  vars(equip_id) ~ px(80),
                  vars(manufacturer) ~ px(125),
                  vars(facility) ~ px(80),
-                 vars(retirement_flag) ~ px(80),
-                 vars(lab_level) ~ px(80),
-                 vars(calib_engineer_nm) ~ px(80),
-                 vars(calib_engineer_post) ~ px(80),
-                 vars(maintenance_engineer_nm) ~ px(100),
-                 vars(maintenance_engineer_post) ~ px(100),
+                 vars(retirement_flag) ~ px(85),
+                 vars(lab_level_is_other) ~ px(80),
+                 vars(engineering_service_provider) ~ px(100),
                  vars(retirement_flag) ~ 90) %>%
       tab_style(style = list(cell_fill(color = "white"),
                              cell_text(color = "red")),
@@ -884,57 +857,51 @@ server <- function(input, output, session) {
                   table.border.top.color = "black",
                   table_body.border.bottom.color = "black",
                   table.width = "80%")
+    
   })
-
+  
   output$download_equip_activity_hist_details <- downloadHandler(
 
     filename = function(){
-      paste0("Activity Details Data ", Sys.Date(), ".xlsx")},
-
-    content = function(file){  # ISSUE HERE
-      xlsx::write.xlsx(as.data.frame(activity_details_export <- historical_data %>%
-                                       filter(equip_id %in% c(input$equipment_id_hist) &
-                                                equip_type %in% c(input$equipment_type_hist) &  
-                                                manufacturer %in% c(input$manufacturer_hist) &
-                                                facility %in% c(input$facility_hist) &
-                                                submitted_by %in% c(input$submitted_by_hist) &
-                                                submission_date >= input$dt_submitted_hist[1] &  
-                                                submission_date <= input$dt_submitted_hist[2] &
-                                                manufacture_date >= input$dt_manufacture_hist[1] &
-                                                manufacture_date <= input$dt_manufacture_hist[2] &
-                                                date_active >= input$dt_active_hist[1] &
-                                                date_active <= input$dt_active_hist[2] &
-                                                most_recent_calibration >= input$dt_calibration_hist[1] &
-                                                most_recent_calibration <= input$dt_calibration_hist[2] &
-                                                most_recent_maintenance >= input$dt_maintenance_hist[1] &
-                                                most_recent_maintenance <= input$dt_maintenance_hist[2]) %>%
-                                       ungroup() %>% 
-                                       select(-c(lab_level_is_other,  
-                                                 latitude,                 
-                                                 longitude,
-                                                 submission_time,
-                                                 retirement_flag)) %>%
-                                       rename("Equipment ID" = equip_id,
-                                              "Submitted by" = submitted_by,
-                                              "Equipment Type" = equip_type,
-                                              "Manufacturer" = manufacturer,
-                                              "Manufacture Date" = manufacture_date,
-                                              "Date Active" = date_active,
-                                              "Facility" = facility,
-                                              "Ownership Type" = ownership_type,
-                                              "Facility Level" = lab_level,
-                                              "Calibration Engineer Name" = calib_engineer_nm,
-                                              "Calibration Engineer Post" = calib_engineer_post,
-                                              "Maintenance Engineer Name" = maintenance_engineer_nm,
-                                              "Maintenance Engineer Post" = maintenance_engineer_post,
-                                              "Most Recent Calibration" = most_recent_calibration,
-                                              "Most Recent Maintenance" = most_recent_maintenance,
-                                              "Submission Date" = submission_date)),
-                       file = file,
-                       sheetName = "Activity Details",
-                       showNA = F,
-                       row.names = F,
-                       append = F)
+      paste0("Activity Details Data ", Sys.Date(), ".csv")},
+    
+    content = function(file){  
+      write_csv(activity_details_export <- historical_data %>%
+                  filter(equip_id %in% c(input$equipment_id_hist) &
+                           equip_type %in% c(input$equipment_type_hist) &
+                           manufacturer %in% c(input$manufacturer_hist) &
+                           facility %in% c(input$facility_hist)) %>%
+                  ungroup() %>% 
+                  select(-c(engineering_service_provider_email_address,
+                            equip_type_other,
+                            freq_service_maintenance,
+                            freq_calibration,
+                            lab_level,
+                            latitude,
+                            longitude,
+                            manufacture_date,
+                            ownership_type_is_other,
+                            submission_time)) %>%
+                  rename(`Date Active` = date_active,
+                         `Service Provider` = engineering_service_provider,
+                         `Equipment ID` = equip_id,
+                         `Purchased By` = equipment_purchase_status,
+                         Status = equipment_status,
+                         `Equipment Type` = equip_type,
+                         `Facility` = facility,
+                         `Facility Level` = lab_level_is_other,
+                         `Manual Available` = manual_availability,
+                         Manufacturer = manufacturer,
+                         `Most Recent Calibration` = most_recent_calibration,
+                         `Most Recent Maintenance` = most_recent_maintenance,
+                         `Ownership Type` = ownership_type,
+                         `Retirement Flag` = retirement_flag,
+                         `Submission Date` = submission_date,
+                         `Submitted by` = submitted_by,
+                         `Warranty Status` = waranty_status),
+                path = file,
+                na = "",
+                append = F)
     }
   )
   
@@ -943,56 +910,53 @@ server <- function(input, output, session) {
     tt <- curr_data_activity_req %>%
       filter(equip_id %in% c(input$equipment_id_req) &
                facility %in% c(input$facility_req) &
-               (is.na(calibration_request_date) |
-                (calibration_request_date >= input$dt_calibration_req[1] &
-                   calibration_request_date <= input$dt_calibration_req[2])) &
-               (is.na(maintenance_request_date) |
-                  (maintenance_request_date >= input$dt_maintenance_req[1] &
-                     maintenance_request_date <= input$dt_maintenance_req[2]))) %>%
+               (!is.na(calibration_request_date) |
+                 !is.na(maintenance_request_date))) %>%
+      ungroup() %>% 
       gt() %>%
       cols_align(align = "center") %>%
-      cols_hide(columns = vars(submission_time_maint,
-                               manufacturer,
-                               manufacture_date,
+      cols_hide(columns = vars(submission_time_calib,
+                               submission_time_maint,
+                               equip_type_other,
                                lab_level,
                                lab_level_is_other,
-                               latitude,
                                longitude,
-                               activity_required_calib,
-                               activity_required_maint,
-                               submission_time_calib,
-                               submission_time_calib,
-                               retirement_flag,
-                               submitted_by,	
-                               submission_date,
+                               ownership_type,
+                               ownership_type_is_other,
+                               waranty_status,
+                               equipment_status,
+                               equipment_purchase_status,
+                               manual_availability,
+                               manufacture_date,
                                date_active,
-                               ownership_type)) %>%
-      cols_move(columns = vars(most_recent_calibration, next_expected_calibration, calib_engineer_nm, calib_engineer_post),
-                after = vars(submission_date_calib)) %>%
-      cols_move(columns = vars(equip_type, facility),
-                after = vars(equip_id)) %>% 
-      cols_move(columns = vars(next_expected_maintenance),
-                after = vars(most_recent_maintenance)) %>% 
-      cols_label(equip_id = "Equipment ID",
+                               engineering_service_provider_email_address,
+                               latitude,
+                               retirement_flag,
+                               submission_time,
+                               submission_date,
+                               activity_required_maint,
+                               activity_required_calib,
+                               submitted_by)) %>%
+      cols_label(calibration_request_date = "Calib Req Date",
+                 engineering_service_provider = "Service Provider",
+                 equip_id = "Equipment ID",
                  equip_type = "Equipment Type",
-                 calibration_request_date = "Calib Req Date",
-                 submission_date_calib = "Date Submitted",  
-                 maintenance_request_date = "Maintenance Req Date",	
-                 submission_date_maint = "Date Submitted",	
                  facility = "Facility",	
-                 calib_engineer_nm = "Calib Engr",
-                 calib_engineer_post = "Engr Post",	
-                 most_recent_calibration = "Last Calib",	
+                 freq_service_maintenance = "Frequency Maintenance",
+                 freq_calibration = "Frequency Calibration",
+                 maintenance_request_date = "Maintenance Req Date",	
+                 manufacturer = "Manufacturer",
+                 most_recent_calibration = "Last Calibration",	
                  most_recent_maintenance = "Last Maintenance",	
-                 maintenance_engineer_nm = "Maintenance Engr",	
-                 maintenance_engineer_post = "Engr Post",	
-                 expected_retirement_date = "Expected Retirement",	
                  next_expected_calibration = "Next Calib",	
-                 next_expected_maintenance = "Next Maintenance") %>%
+                 next_expected_maintenance = "Next Maintenance",
+                 submission_date_maint = "Date Submitted Maintenance",	
+                 submission_date_calib = "Date Submitted Calibration") %>%
       fmt_missing(columns = everything(),
                   missing_text = "") %>% 
       cols_width(vars(equip_id) ~ px(80),
-                 vars(most_recent_calibration, next_expected_calibration) ~ px(120)) %>%
+                 vars(most_recent_calibration, next_expected_calibration) ~ px(120),
+                 vars(facility) ~ px(150)) %>%
       tab_style(style = list(cell_fill(color = "white"),
                              cell_text(color = "red")),
                 locations = cells_data(columns = vars(equip_id),
@@ -1019,60 +983,58 @@ server <- function(input, output, session) {
                   table.border.top.color = "black",
                   table_body.border.bottom.color = "black",
                   table.width = "80%")
+    
   })
 
   output$download_equip_req_details <- downloadHandler(
 
     filename = function(){
-      paste0("Request Details Data ", Sys.Date(), ".xlsx")},
-
+      paste0("Request Details Data ", Sys.Date(), ".csv")},
+    
     content = function(file){
-      xlsx::write.xlsx(as.data.frame(tt <- curr_data_activity_req %>%
-                                       filter(equip_id %in% c(input$equipment_id_req) &
-                                                facility %in% c(input$facility_req) &
-                                                (is.na(calibration_request_date) |
-                                                   (calibration_request_date >= input$dt_calibration_req[1] &
-                                                      calibration_request_date <= input$dt_calibration_req[2])) &
-                                                (is.na(maintenance_request_date) |
-                                                   (maintenance_request_date >= input$dt_maintenance_req[1] &
-                                                      maintenance_request_date <= input$dt_maintenance_req[2]))) %>%
-                                       select(-c(submission_time_maint,
-                                                 manufacturer,
-                                                 manufacture_date,
-                                                 lab_level,
-                                                 lab_level_is_other,
-                                                 latitude,
-                                                 longitude,
-                                                 activity_required_calib,
-                                                 activity_required_maint,
-                                                 submission_time_calib,
-                                                 submission_time_calib,
-                                                 retirement_flag,
-                                                 submitted_by,	
-                                                 submission_date,
-                                                 date_active,
-                                                 ownership_type)) %>%
-                                       rename("Equipment ID" = equip_id,
-                                              "Equipment Type" = equip_type,
-                                              "Calib Req Date" = calibration_request_date,
-                                              "Date Submitted" = submission_date_calib,  
-                                              "Maintenance Req Date" = maintenance_request_date,	
-                                              "Date Submitted" = submission_date_maint,	
-                                              "Facility" = facility,	
-                                              "Calib Engr" = calib_engineer_nm,
-                                              "Engr Post" = calib_engineer_post,	
-                                              "Last Calib" = most_recent_calibration,	
-                                              "Last Maintenance" = most_recent_maintenance,	
-                                              "Maintenance Engr" = maintenance_engineer_nm,	
-                                              "Engr Post" = maintenance_engineer_post,	
-                                              "Expected Retirement" = expected_retirement_date,	
-                                              "Next Calib" = next_expected_calibration,	
-                                              "Next Maintenance" = next_expected_maintenance)),
-                       file = file,
-                       sheetName = "Equip Details",
-                       showNA = F,
-                       row.names = F,
-                       append = F)
+      write_csv(tt <- curr_data_activity_req %>%
+                  filter(equip_id %in% c(input$equipment_id_req) &
+                           facility %in% c(input$facility_req) &
+                           (!is.na(calibration_request_date) |
+                              !is.na(maintenance_request_date))) %>%
+                  select(-c(activity_required_maint,
+                            activity_required_calib,
+                            date_active,
+                            engineering_service_provider_email_address,
+                            equipment_purchase_status,
+                            equip_type_other,
+                            equipment_status,
+                            lab_level,
+                            lab_level_is_other,
+                            latitude,
+                            manual_availability,
+                            manufacture_date,
+                            ownership_type,
+                            ownership_type_is_other,
+                            retirement_flag,
+                            submission_date,
+                            submission_time_calib,
+                            submission_time_maint,
+                            submission_time,
+                            submitted_by,
+                            waranty_status)) %>%
+                  rename(`Calib Req Date` = calibration_request_date,
+                         `Date Submitted Calibration` = submission_date_calib,  
+                         `Date Submitted Maintenance` = submission_date_maint,	
+                         `Equipment ID` = equip_id,
+                         `Equipment Type` = equip_type,
+                         `Facility` = facility,	
+                         `Frequency Maintenance` = freq_service_maintenance,
+                         `Frequency Calibration` = freq_calibration,
+                         `Last Calibration` = most_recent_calibration,	
+                         `Last Maintenance` = most_recent_maintenance,	
+                         `Maintenance Req Date` = maintenance_request_date,	
+                         `Next Calib` = next_expected_calibration,	
+                         `Next Maintenance` = next_expected_maintenance,
+                         `Service Provider` = engineering_service_provider),
+                path = file,
+                na = "",
+                append = F)
     }
   )
   
