@@ -5,13 +5,12 @@ date: "1/18/2019"
 output: html_document
 ---
 
-```{r setup, include=FALSE}
+```{r}
+
 knitr::opts_chunk$set(echo = F,
                       message = F,
                       warning = F)
-```
 
-```{r}
 library(ggplot2)
 library(reader)
 library(ggthemes)
@@ -29,6 +28,7 @@ library(readr)
 library(readxl)
 library(tibble)
 library(kableExtra)
+library(gt)
 
 library(blastula)
 # library(gt)
@@ -38,6 +38,10 @@ library(blastula)
 
 ```{r}
 # Created credentials to pass through emails, assuming I only have to create it once and reference it when I want to pass it - file now exists in the active WD
+
+# create_smtp_creds_file(file = "creds_file",
+#                        user = "pacafenet@gmail.com",
+#                        provider = "gmail")
 
 # create_email_creds_file(user = "pacafenet@gmail.com",
 #                         password = "projectpi2018",
@@ -56,57 +60,15 @@ library(blastula)
 This is the same as the code I use to read into the application. 
 
 ```{r}
-curr_date <- mdy("5/1/2016")
+curr_date <- Sys.Date()
 
-googlesheets::gs_auth(token = "shiny_app_token.rds")
-my_sheets <- googlesheets::gs_ls()
+alerts <- read_csv(file = "Alert Data\\alert_data.csv") %>% 
+  filter(activity_required_maint == "Yes" | 
+           activity_required_calib == "Yes")
 
-sheet_key <- my_sheets$sheet_key[1]
-ss <- googlesheets::gs_key(my_sheets$sheet_key[1])
+# Alert Data\\alert_data.csv
 
-# ss_data <- read_csv(file = "data\\fake_equip_data.csv") %>%
-ss_data <- googlesheets::gs_read_csv(ss) %>%
-  mutate(manufacture_date = mdy(manufacture_date),
-         date_active = mdy(date_active),
-         date_not_viable = mdy(date_not_viable),
-         most_recent_calibration = mdy(most_recent_calibration),
-         next_calibration = mdy(next_calibration),
-         most_recent_maintenance = mdy(most_recent_maintenance),
-         next_maintenance = mdy(next_maintenance),
-         retirement_date = mdy(retirement_date),
-         requires_attn = if_else(condition = date_not_viable < curr_date |
-                                   next_calibration < curr_date |
-                                   next_maintenance < curr_date,
-                                 true = "red",
-                                 false = if_else(condition = date_not_viable - curr_date < 10 |
-                                                   next_calibration - curr_date < 10 |
-                                                   next_maintenance - curr_date < 10,
-                                                 true = "yellow",
-                                                 false = "blue")),
-         requires_attn_label = if_else(condition = date_not_viable < curr_date |
-                                   next_calibration < curr_date |
-                                   next_maintenance < curr_date,
-                                 true = "Immediately",
-                                 false = if_else(condition = date_not_viable - curr_date < 10 |
-                                                   next_calibration - curr_date < 10 |
-                                                   next_maintenance - curr_date < 10,
-                                                 true = "Soon",
-                                                 false = "OK")),
-         viable_attn = if_else(condition = date_not_viable < curr_date,
-                               true = 3,
-                               false = if_else(condition = date_not_viable - curr_date < 10,
-                                               true = 2,
-                                               false = 1)),
-         calibration_attn = if_else(condition = next_calibration < curr_date,
-                               true = 3,
-                               false = if_else(condition = next_calibration - curr_date < 10,
-                                               true = 2,
-                                               false = 1)),
-         maintenance_attn = if_else(condition = next_maintenance < curr_date,
-                               true = 3,
-                               false = if_else(condition = next_maintenance - curr_date < 10,
-                                               true = 2,
-                                               false = 1)))
+
 ```
 
 ## Create the email to send to the maintenance engineer based on the current state of the data
@@ -118,48 +80,64 @@ cta_button <- add_cta_button(url = "https://travis-shinin-spot.shinyapps.io/etoo
                              text = "eTool Link",
                              align = "center")
 
-for(i in unique(ss_data$calib_engineer_nm)){
+for(i in unique(alerts$engineering_service_provider)){
   
-  # i <- unique(ss_data$calib_engineer_nm)[1]
+  # i <- unique(alerts$engineering_service_provider)[1]
   
-  mail_dt <- ss_data %>% 
-    filter(calib_engineer_nm == i &
-             requires_attn %in% c("red", "yellow")) %>% 
-    select(serial_num) 
+  mail_dt <- alerts %>% 
+    filter(engineering_service_provider == i) %>% 
+    group_by(facility) %>% 
+    select(equip_id)
   
   if(nrow(mail_dt) == 0){
     next
   }
   
-  mail_dt <- mail_dt %>% 
-    formattable::format_table()  # Replace with gt tables once I get the package working
-  # gt::gt()
+  mail_dt_table <- mail_dt %>% 
+    ungroup() %>% 
+    gt() %>% 
+    cols_align(align = "left") %>%
+    cols_label(facility = "Facility",
+               equip_id = "Equipment ID") %>%
+    fmt_missing(columns = everything(),
+                missing_text = "") %>% 
+    tab_header(title = "Equipment Requiring Attention") %>%
+    tab_options(row.striping.include_stub = T,
+                row.striping.include_table_body = T,
+                table.border.top.color = "black",
+                table_body.border.bottom.color = "black",
+                table.width = "80%") %>% 
+    as_raw_html()
   
-  email <- compose_email(body = paste0("Hello ",  # Use html tags for formatting - or md if I can get that package to work
-                                       i, ", ", "<br>",
-                                       "<br>",
-                                       " The following serial numbers correspond to \\
-                                       equipment that either requires attention now or will \\
-                                       in the very near future. 
-                                       <br>
-                                       {mail_dt}<br>
-                                       <br>
-                                       Please click the link below to go to the eTool.<br>
-                                       <br>
-                                       {cta_button}<br>
-                                       <br>
-                                       Kind Regards,<br>
-                                       <br>
-                                       Travis Sondgerath, MS, MPH")) %>% 
-      preview_email()  # Comment this part out once I'm ready to send a test email - needs to be an email object
+  # May need to convert to html
+  email <- compose_email(body = md(paste0("Hello ",  # Use html tags for formatting - or md if I can get that package to work
+                                          i, ", ", "<br>",
+                                          "<br>",
+                                          " The following serial numbers correspond to \\
+                                          equipment that either requires attention now or will \\
+                                          in the very near future. 
+                                          <br>",
+                                          mail_dt_table,
+                                          "<br>
+                                          <br>
+                                          Please click the link below to go to the eTool.<br>
+                                          <br>",
+                                          cta_button,
+                                          "<br>
+                                          <br>
+                                          Kind Regards,<br>
+                                          <br>
+                                          Travis Sondgerath, MS, MPH"))) 
+  
+  # Comment this part out once I'm ready to send a test email - needs to be an email object
   
   # Would need to add a lookup table like my progress reports for the correct emails
   
-  send_email_out(message = email,
-                 from = "pacafenet@gmail.com",
-                 to = "tsondger@gmail.com",
-                 subject = "Attn: Equipment Alert",
-                 creds_file = ".bls_smtp_gmail_com")  # Think this is correct, although it looks a little weird - feel like there should be a file extension
+  smtp_send(email = email,
+            from = "pacafenet@gmail.com",
+            to = "tsondger@gmail.com",
+            subject = "Attn: Equipment Alert",
+            credentials = creds_file("creds_file"))  # Think this is correct, although it looks a little weird - feel like there should be a file extension
   
 }
 
