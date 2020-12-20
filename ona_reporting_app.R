@@ -31,9 +31,7 @@ library(gt)
 library(readr)
 library(shinydashboard)
 library(dashboardthemes)
-library(shinyWidgets)
 library(plotly)
-library(dashboardthemes)
 
 ### Data pipeline
 
