@@ -33,7 +33,7 @@ library(shinydashboard)
 library(dashboardthemes)
 library(plotly)
 
-### Data pipeline
+### Data pipeline - Moving all this to a separate process 
 
 #########################################################################################################
 
@@ -129,8 +129,9 @@ equip_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/460026/
   ungroup() %>% 
   mutate(equip_id = as.character(equip_id))
 
+# Activity form - still based on just fake data, so no changes made as of yet - FIX LATER - generate some fake data to support QA
 
-# Activity form - still based on just fake data, so no changes made as of yet - FIX LATER
+# Need to change to use the Equipment Alteration form - will be an easier process 
 
 activity_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/460087/download.csv?data-type=dataset",
                                      na = c("n/a", "")) %>%  
