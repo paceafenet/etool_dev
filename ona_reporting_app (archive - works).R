@@ -33,9 +33,9 @@ library(shinydashboard)
 library(dashboardthemes)
 library(plotly)
 
-### Data pipeline - Moving all this to a separate process 
-
 #########################################################################################################
+
+tt <- read_csv(file = "Data\\current_state_data.csv")
 
 # Historical Data #
 

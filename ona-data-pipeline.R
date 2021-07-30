@@ -220,7 +220,7 @@ for(i in 1:nrow(activity_info)){
 
 ## Keep historical record of activities ##
 
-# NOW - need to figure out a way to preserver the historical data. What I've done above takes the data as it was originally entered and changes the values
+# NOW - need to figure out a way to preserve the historical data. What I've done above takes the data as it was originally entered and changes the values
 # to reflect the current state. Need to be able to report on how it's changed over time. 
 
 # Requirements - if timestamp later than exisitng, create a new row in the existing data with all old columns but the new value reflected
@@ -231,12 +231,13 @@ activity_info_historical <- read_csv(file = "https://ona.io/pacafenet/99874/5942
          submitted_by = "_submitted_by") %>%
   rename_all(~gsub(pattern = "-", replacement = "_", x = .)) %>%
   rename_all(~tolower(.)) %>%
+  rename(equip_id = "equipment_id") %>% 
   # WARNING - SEE BELOW
   # Put this back in when working with real data
   # filter(submitted_by != "pacafenet" |
   # is.na(submitted_by)) %>%
-  select(equipment_id, equipment_attribute_to_alter, new_value, submission_time) %>%
-  arrange(equipment_id, desc(submission_time)) %>% 
+  select(equip_id, equipment_attribute_to_alter, new_value, submission_time) %>%
+  arrange(equip_id, desc(submission_time)) %>% 
   # distinct(equipment_id, equipment_attribute_to_alter, .keep_all = T) %>%  # don't need this fx if keeping all activity
   left_join(x = ., y = activity_equip_info_lookup, by = "equipment_attribute_to_alter")
 
@@ -248,11 +249,10 @@ for(i in 1:nrow(activity_info_historical)){
   # i <- 3  # Dates
   # i <- 7  # Numbers
 
-  
   curr_data <- activity_info_historical %>%
     slice(i)
 
-  if(curr_data$submission_time > max(equip_info_historical$submission_time[equip_info_historical$equip_id == curr_data$equipment_id], na.rm = T)){
+  if(curr_data$submission_time > max(equip_info_historical$submission_time[equip_info_historical$equip_id == curr_data$equip_id], na.rm = T)){
 
     # For characters
     
@@ -262,7 +262,7 @@ for(i in 1:nrow(activity_info_historical)){
         mutate(new_value = str_to_title(string = new_value)) %>% 
         select(-equipment_attribute_to_alter) %>% 
         spread(key = equip_info_colnames, value = new_value) %>% 
-        left_join(x = ., y = equip_info_historical, by = c("equipment_id" = "equip_id")) %>% 
+        left_join(x = ., y = equip_info_historical, by = c("equip_id")) %>% 
         select(-contains(".y")) %>% 
         rename_all(~str_remove_all(string = ., pattern = ".x"))
       
@@ -278,7 +278,7 @@ for(i in 1:nrow(activity_info_historical)){
         mutate(new_value = ymd(new_value)) %>%
         select(-equipment_attribute_to_alter) %>%
         spread(key = equip_info_colnames, value = new_value) %>%
-        left_join(x = ., y = equip_info_historical, by = c("equipment_id" = "equip_id")) %>%
+        left_join(x = ., y = equip_info_historical, by = c("equip_id")) %>%
         select(-contains(".y")) %>%
         rename_all(~str_remove_all(string = ., pattern = ".x"))
 
@@ -294,7 +294,7 @@ for(i in 1:nrow(activity_info_historical)){
         mutate(new_value = as.numeric(new_value)) %>%
         select(-equipment_attribute_to_alter) %>%
         spread(key = equip_info_colnames, value = new_value) %>%
-        left_join(x = ., y = equip_info_historical, by = c("equipment_id" = "equip_id")) %>%
+        left_join(x = ., y = equip_info_historical, by = c("equip_id")) %>%
         select(-contains(".y")) %>%
         rename_all(~str_remove_all(string = ., pattern = ".x"))
       
@@ -345,32 +345,32 @@ maintenance_req_info_hist <- read_csv(file = "https://ona.io/pacafenet/99874/461
 req_info_hist <- full_join(x = calib_req_info_hist, y = maintenance_req_info_hist, by = "equip_id", suffix = c("_calib", "_maint")) %>%
   mutate(submitted_by = if_else(condition = is.na(submitted_by_calib),
                                 true = submitted_by_maint,
-                                false = submitted_by_calib)) %>%
+                                false = submitted_by_calib)) #%>%
   # WARNING - SEE BELOW
   # Put this back in when working with real data
-  filter(submitted_by != "pacafenet" |
-           is.na(submitted_by)) %>%
-  select(-submitted_by_calib, -submitted_by_maint) %>%
-  filter(submitted_by != "pacafenet")
+  # filter(submitted_by != "pacafenet" |
+           # is.na(submitted_by)) %>%
+  # select(-submitted_by_calib, -submitted_by_maint) 
 
 #####################################################
 
 ## Write to eTool Directory ##
 
 write_csv(equip_info_current,
-          path = "..//shiny-server//eTool//Data//current_state_data.csv")
+          path = "..//shiny-server//eTool//current_state_data.csv")
 
 write_csv(equip_info_historical,
-          path = "..//shiny-server//eTool//Data//historical_data.csv")
+          path = "..//shiny-server//eTool//historical_data.csv")
 
 write_csv(req_info_hist,
-          path = "..//shiny-server//eTool//Data//request_history_data.csv")
+          path = "..//shiny-server//eTool//request_history_data.csv")
 
 ##############################
 
+## The final Section We need is to push the directory to GitHub ##
 
+##################################################################
 
-# Then - pull in the calibration 
 
 
 
